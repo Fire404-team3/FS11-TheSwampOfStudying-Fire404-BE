@@ -1,0 +1,63 @@
+// Prisma Client 생성 설정
+generator client {
+    provider = "prisma-client"
+    output   = "../generated/prisma"
+}
+
+// 데이터베이스 연결 설정
+datasource db {
+    provider = "postgresql"
+}
+
+model User {
+    id        String   @id @default(cuid())
+    nickname  String
+    createdAt DateTime @default(now())
+
+    studies Study[]
+}
+
+model Study {
+    id          String   @id @default(cuid())
+    name        String
+    description String
+    background  String
+    password    String
+    points      Int
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    habits    Habit[]
+    emojiLogs EmojiLog[]
+    user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId    String
+}
+
+model Habit {
+    id        String    @id @default(cuid())
+    studyId   String
+    habitName String
+    startDate DateTime
+    endDate   DateTime?
+
+    records HabitRecord[]
+    study   Study         @relation(fields: [studyId], references: [id])
+}
+
+model HabitRecord {
+    id        String   @id @default(cuid())
+    habitId   String
+    checkDate DateTime
+    isChecked Boolean  @default(false)
+
+    habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+}
+
+model EmojiLog {
+    id        String @id @default(cuid())
+    studyId   String
+    emojiType String
+    count     Int    @default(1)
+
+    study Study @relation(fields: [studyId], references: [id], onDelete: Cascade)
+}

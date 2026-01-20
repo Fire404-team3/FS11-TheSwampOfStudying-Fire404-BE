@@ -7,6 +7,17 @@
   "engines": {
     "node": ">=22.0.0"
   },
+ "imports": {
+    "#generated/*": "./generated/*",
+    "#config": "./src/config/config.js",
+    "#db/*": "./src/db/*",
+    "#repository": "./src/repository/index.js",
+    "#constants": "./src/constants/index.js",
+    "#utils": "./src/utils/index.js",
+    "#middlewares": "./src/middlewares/index.js",
+    "#exceptions": "./src/exceptions/index.js"
+  },
+
   "scripts": {
     "dev": "nodemon --env-file=./env/.env.development src/server.js",
     "prod": "node --env-file=./env/.env.production src/server.js",
@@ -25,7 +36,7 @@
     { "name": "이석우" },
     { "name": "최우진" }
   ],
-  
+
   "license": "MIT",
   "dependencies": {
     "@prisma/adapter-pg": "^7.2.0",
