@@ -11,11 +11,41 @@ node -v
 # nvm use 22
 ```
 
-### 2. 레포지토리 클론 및 의존성 파일 설치
-
+### 2-1. 레포지토리 클론
 ```bash
 git clone https://github.com/Fire404-team3/FS11-TheSwampOfStudying-Fire404-BE.git
+cd FS11-TheSwampOfStudying-Fire404-BE
+```
 
+### 2-2. 개발시 브랜치 흐름
+⚠️ develop 브랜치는 공용 기준 브랜치입니다.
+직접 커밋하지 말고 반드시 feature 브랜치에서 작업해주세요.  
+
+1️⃣ develop에서 feature 브랜치 생성
+```bash
+git switch develop
+git pull origin develop
+git switch -c feature/기능명
+```
+
+2️⃣ 작업 + 커밋
+```bash
+git add .
+git commit -m "feat: 뭐뭐 구현"
+```
+
+3️⃣ feature 브랜치 푸시
+```bash
+git push origin feature/기능명
+```
+
+4️⃣ GitHub에서 PR 생성
+- base: develop
+- compare: feature/기능명
+
+
+### 2-3. 브랜치 분기 후 의존성 파일 설치
+```bash
 npm install
 ```
 
@@ -80,9 +110,6 @@ src/
 │  └─ prisma.js
 ├─ routes/
 │  ├─ index.js
-│  ├─ users/
-│  │  ├─ index.js
-│  │  └─ users.routes.js
 │  ├─ studies/
 │  │  ├─ index.js
 │  │  └─ studies.routes.js
