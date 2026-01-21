@@ -34,25 +34,6 @@ studiesRouter.get('/', async (req, res) => {
     res.status(500).json({ message: '서버 에러 발생' });
   }
 });
-
-// 임시 테스트 코드
-studiesRouter.post('/', async (req, res) => {
-  try {
-    const newStudy = await prisma.study.create({
-      data: {
-        name: '두 번째 테스트 스터디', // 이름을 살짝 바꿔주면 구분하기 좋아요
-        description: '비밀번호까지 넣고 성공할 데이터!',
-        nickname: '테스터2',
-        points: 300, // 정렬 확인을 위해 점수를 아까와 다르게 설정해 보세요
-        background: 'blue-theme',
-        password: 'password123', // 이 부분을 추가했습니다!
-      },
-    });
-    res.status(201).json(newStudy);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
 // 계층 연결
 studiesRouter.use('/:id/habits', habitRouter);
 studiesRouter.use('/:id/emojis', emojiRouter);
