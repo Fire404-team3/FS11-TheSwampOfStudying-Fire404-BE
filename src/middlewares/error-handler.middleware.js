@@ -1,4 +1,4 @@
-import { Prisma } from '#generated/prisma/client.js';
+import { Prisma } from '#generated/prisma/client.ts';
 import { ERROR_MESSAGE, HTTP_STATUS, PRISMA_ERROR } from '#constants';
 import { HttpExeption } from '#exceptions';
 
