@@ -9,11 +9,20 @@ export const studiesRouter = express.Router();
 
 studiesRouter.get('/', async (req, res, next) => {
   try {
-    const { page = 1, limit = 10, sort = 'latest', search } = req.query;
+    const {
+      page = 1,
+      limit = 10,
+      sort = 'latest',
+      order = 'desc',
+      search,
+    } = req.query;
 
     const pageNum = Math.max(parseInt(page, 10) || 1, 1);
     const take = Math.max(parseInt(limit, 10) || 10, 1);
     const skip = (pageNum - 1) * take;
+
+    const sortOrder = order.toLowerCase() === 'asc' ? 'asc' : 'desc';
+    const sortField = sort === 'points' ? 'points' : 'createdAt';
 
     const whereClause = search
       ? {
@@ -28,7 +37,7 @@ studiesRouter.get('/', async (req, res, next) => {
       prisma.study.findMany({
         where: whereClause,
         orderBy: {
-          [sort === 'points' ? 'points' : 'createdAt']: 'desc',
+          [sortField]: sortOrder,
         },
         take,
         skip,
