@@ -1,0 +1,74 @@
+/* Header 기본형 스타일 */
+.header {
+  width: 100%;
+  background-color: #F6F4EF;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem 2rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* 공부의 숲 Logo 이미지 */
+.header__logo {
+  display: block;
+  width: 11.35019rem;
+  height: 3.75rem;
+  object-fit: contain;
+}
+
+/* 스터디 만들기 버튼 */
+.header__cta {
+  width: 15.75rem;
+  height: 3.5625rem;
+
+  background-color: #9FC38F;
+  color: #ffffff;
+  border: none;
+  border-radius: 999px;
+
+  font-size: 1rem;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+/* 타블렛용 */
+@media (max-width: 1024px) {
+  .header__logo {
+    width: 11.35019rem;
+    height: 3.75rem;
+  }
+
+  .header__cta {
+    width: 10rem;
+    height: 3.5625rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* 모바일용 */
+@media (max-width: 768px) {
+  .header__inner {
+    padding: 1rem 1.25rem;
+  }
+
+  .header__logo {
+    width: 6.625rem;
+    height: 2.18881rem;
+  }
+
+  .header__cta {
+    width: 6.625rem;
+    height: 2.375rem;
+    font-size: 0.75rem;
+  }
+}
