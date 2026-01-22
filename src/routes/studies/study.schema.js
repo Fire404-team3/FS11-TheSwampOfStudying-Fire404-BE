@@ -58,6 +58,5 @@ export const updateStudySchema = createStudySchema
 
 // POST /:id/check-password 비밀번호 검증용 스키마
 export const passwordCheckSchema = z.object({
-  id: z.string({ required_error: ERROR_MESSAGE.STUDY_ID_REQUIRED }),
   password: z.string({ required_error: ERROR_MESSAGE.PASSWORD_REQUIRED }),
 });
