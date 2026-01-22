@@ -9,8 +9,9 @@ studiesRouter.get('/', async (req, res) => {
   try {
     const { page = 1, limit = 10, sort = 'latest', search } = req.query;
 
-    const take = Number(limit);
-    const skip = (Number(page) - 1) * take;
+    const pageNum = Math.max(parseInt(page, 10) || 1, 1);
+    const take = Math.max(parseInt(limit, 10) || 10, 1);
+    const skip = (pageNum - 1) * take;
 
     const studies = await prisma.study.findMany({
       where: search
