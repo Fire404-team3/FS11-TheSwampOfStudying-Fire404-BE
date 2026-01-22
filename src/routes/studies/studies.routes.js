@@ -1,9 +1,9 @@
 import express from 'express';
 import { habitRouter } from '../habits/index.js';
 import { emojiRouter } from '../emojis/index.js';
-import { prisma } from '#db/prisma.js';
 import { ERROR_MESSAGE, HTTP_STATUS } from '#constants';
 import { HttpException } from '#exceptions';
+import { studiesRepository } from '../../repository/studies.repository.js';
 
 export const studiesRouter = express.Router();
 
@@ -33,19 +33,14 @@ studiesRouter.get('/', async (req, res, next) => {
         }
       : {};
 
-    const [studies, totalCount] = await Promise.all([
-      prisma.study.findMany({
-        where: whereClause,
-        orderBy: {
-          [sortField]: sortOrder,
-        },
-        take,
-        skip,
-      }),
-      prisma.study.count({
-        where: whereClause,
-      }),
-    ]);
+    const { studies, totalCount } = await studiesRepository.findAndCountAll({
+      where: whereClause,
+      orderBy: {
+        [sortField]: sortOrder,
+      },
+      take: take,
+      skip: skip,
+    });
 
     res.status(HTTP_STATUS.OK).json({
       data: studies,
