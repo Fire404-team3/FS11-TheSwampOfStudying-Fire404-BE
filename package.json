@@ -7,7 +7,7 @@
   "engines": {
     "node": ">=22.0.0"
   },
- "imports": {
+  "imports": {
     "#generated/*": "./generated/*",
     "#config": "./src/config/config.js",
     "#db/*": "./src/db/*",
@@ -17,7 +17,6 @@
     "#middlewares": "./src/middlewares/index.js",
     "#exceptions": "./src/exceptions/index.js"
   },
-
   "scripts": {
     "dev": "nodemon --env-file=./env/.env.development src/server.js",
     "prod": "node --env-file=./env/.env.production src/server.js",
@@ -28,15 +27,26 @@
     "format": "prettier --write src/**/*.js",
     "format:check": "prettier --check src/**/*.js"
   },
-  "contributors": [            
-    { "name": "백은결" },
-    { "name": "박도담" },
-    { "name": "박수훈" },
-    { "name": "윤숙희" },
-    { "name": "이석우" },
-    { "name": "최우진" }
+  "contributors": [
+    {
+      "name": "백은결"
+    },
+    {
+      "name": "박도담"
+    },
+    {
+      "name": "박수훈"
+    },
+    {
+      "name": "윤숙희"
+    },
+    {
+      "name": "이석우"
+    },
+    {
+      "name": "최우진"
+    }
   ],
-
   "license": "MIT",
   "dependencies": {
     "@prisma/adapter-pg": "^7.2.0",
