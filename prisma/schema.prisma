@@ -52,8 +52,4 @@ model EmojiLog {
     study Study @relation(fields: [studyId], references: [id], onDelete: Cascade)
 
     @@unique([studyId, emojiType])
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> develop
