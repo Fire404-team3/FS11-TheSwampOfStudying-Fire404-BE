@@ -25,7 +25,7 @@ function updateStudy(id, data) {
 // 스터디 삭제
 function deleteStudy(id) {
   return prisma.study.delete({
-    where: { id: Number(id) },
+    where: { id: id },
   });
 }
 

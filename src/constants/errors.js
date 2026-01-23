@@ -8,10 +8,10 @@ export const PRISMA_ERROR = {
 export const ERROR_MESSAGE = {
   // Study 관련
   STUDY_NOT_FOUND: 'Study not found',
-  // NICKNAME_REQUIRED: 'Nickname is required',
-  // STUDY_NAME_REQUIRED: 'Study name is required',
-  // DESCRIPTION_REQUIRED: 'Description is required',
-  // PASSWORD_REQUIRED: 'Password is required',
+  // NICKNAME_REQUIRED: 'Nickname is required', // 아래 유효성검사로 이동 및 한글로 수정
+  // STUDY_NAME_REQUIRED: 'Study name is required', // 아래 유효성검사로 이동 및 한글로 수정
+  // DESCRIPTION_REQUIRED: 'Description is required', // 아래 유효성검사로 이동 및 한글로 수정
+  // PASSWORD_REQUIRED: 'Password is required', // 아래 유효성검사로 이동 및 한글로 수정
   REQUIRED_INFORMATION: 'Please enter required information',
   FAILED_TO_FETCH_STUDIES: 'Failed to fetch studies',
   FAILED_TO_FETCH_STUDY: 'Failed to fetch study',
