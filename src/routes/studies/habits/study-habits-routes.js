@@ -24,11 +24,11 @@ studyHabitsRouter.get('/', async (req, res) => {
       '금요일',
       '토요일',
     ];
-    const todayIndex = weekdays[new Date().getDay()];
+    const todayName = weekdays[new Date().getDay()];
 
     const habitList = await findstudyWithHabits(
       id,
-      todayIndex,
+      todayName,
     );
     if (!habitList) {
       return res
@@ -39,7 +39,7 @@ studyHabitsRouter.get('/', async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: `${id}의 스터디 ${todayIndex} 습관 목록 조회 성공`,
+      message: `${id}의 스터디 ${todayName} 습관 목록 조회 성공`,
       data: habitList,
     });
   } catch (error) {
