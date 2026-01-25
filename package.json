@@ -7,7 +7,7 @@
   "engines": {
     "node": ">=22.0.0"
   },
- "imports": {
+  "imports": {
     "#generated/*": "./generated/*",
     "#config": "./src/config/config.js",
     "#db/*": "./src/db/*",
@@ -19,7 +19,6 @@
     "#controllers/*": "./src/controllers/*",
     "#services/*": "./src/services/*"
   },
-
   "scripts": {
     "dev": "nodemon --env-file=./env/.env.development src/server.js",
     "prod": "node --env-file=./env/.env.production src/server.js",
@@ -30,19 +29,30 @@
     "format": "prettier --write src/**/*.js",
     "format:check": "prettier --check src/**/*.js"
   },
-  "contributors": [            
-    { "name": "백은결" },
-    { "name": "박도담" },
-    { "name": "박수훈" },
-    { "name": "윤숙희" },
-    { "name": "이석우" },
-    { "name": "최우진" }
+  "contributors": [
+    {
+      "name": "백은결"
+    },
+    {
+      "name": "박도담"
+    },
+    {
+      "name": "박수훈"
+    },
+    {
+      "name": "윤숙희"
+    },
+    {
+      "name": "이석우"
+    },
+    {
+      "name": "최우진"
+    }
   ],
-
   "license": "MIT",
   "dependencies": {
     "@prisma/adapter-pg": "^7.2.0",
-    "@prisma/client": "^7.2.0",
+    "@prisma/client": "^7.3.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.3",
@@ -58,6 +68,6 @@
     "eslint": "^9.39.2",
     "nodemon": "^3.1.11",
     "prettier": "^3.8.0",
-    "prisma": "^7.2.0"
+    "prisma": "^7.3.0"
   }
 }
