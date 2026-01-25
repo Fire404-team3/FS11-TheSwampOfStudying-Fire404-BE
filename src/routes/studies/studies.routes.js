@@ -10,19 +10,152 @@ import {
   passwordCheckSchema,
   updateStudySchema,
 } from './study.schema.js';
+import { prisma } from '#db/prisma.js';
+import { HTTP_STATUS, ERROR_MESSAGE } from '#constants';
+import { NotFoundException, BadRequestException } from '#exceptions';
 
 export const studiesRouter = express.Router();
 
-// 헬스 체크
-studiesRouter.get('/', (req, res) => {
-  res.send('/studies 헬스체크 ok');
+// GET /studies/:id - 스터디 상세 정보 + Top3 이모지
+studiesRouter.get('/:id', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Prisma로 스터디 조회 + Top3 이모지
+    const study = await prisma.study.findUnique({
+      where: { id },
+      include: {
+        emojiLogs: {
+          orderBy: { count: 'desc' },
+          take: 3,
+        },
+      },
+    });
+
+    // 표시할 스터디 없으면 404
+    if (!study) {
+      throw new NotFoundException(ERROR_MESSAGE.STUDY_NOT_FOUND);
+    }
+
+    // password 제거 & emojiLogs -> top 3Emojis 변환
+    const { password, emojiLogs, ...studyData } = study;
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: {
+        ...studyData,
+        top3Emojis: emojiLogs.map(({ emojiType, count }) => ({
+          emojiType,
+          count,
+        })),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// POST /studies/:id/emojis - 응원 이모지 카운트 증가
+studiesRouter.post('/:id/emojis', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { emojiType } = req.body;
+
+    // 이모지 필드가 존재하지 않을 경우 - 프론트엔드 박살
+    if (!emojiType || emojiType.trim() === '') {
+      throw new BadRequestException(ERROR_MESSAGE.EMOJI_TYPE_REQUIRED);
+    }
+
+    // 이모지가 붙을 스터디가 존재하지 확인
+    const study = await prisma.study.findUnique({
+      where: { id },
+    });
+
+    if (!study) {
+      throw new NotFoundException(ERROR_MESSAGE.STUDY_NOT_FOUND);
+    }
+
+    // 같은 이모지가 있으면 +1, 없으면 새로 생성
+    const emoji = await prisma.emojiLog.upsert({
+      where: {
+        studyId_emojiType: {
+          studyId: id,
+          emojiType: emojiType.trim(),
+        },
+      },
+      update: {
+        count: {
+          increment: 1,
+        },
+      },
+      create: {
+        studyId: id,
+        emojiType: emojiType.trim(),
+        count: 1,
+      },
+    });
+
+    res.status(HTTP_STATUS.CREATED).json({
+      success: true,
+      data: emoji,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// POST /studies/:id/points - 공부 시간 비례 포인트 적립
+studiesRouter.post('/:id/points', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { minutes } = req.body;
+
+    // minutes 필드 검증 (필수, 양수)
+    if (minutes === undefined || minutes === null) {
+      throw new BadRequestException('Minutes is required');
+    }
+
+    if (typeof minutes !== 'number' || minutes <= 0) {
+      throw new BadRequestException('Minutes must be greater than 0');
+    }
+
+    // 스터디 존재 확인
+    const study = await prisma.study.findUnique({
+      where: { id },
+    });
+
+    if (!study) {
+      throw new NotFoundException(ERROR_MESSAGE.STUDY_NOT_FOUND);
+    }
+
+    // 포인트 계산: 기본 3p + 10분당 1p
+    const earnedPoints = 3 + Math.floor(minutes / 10);
+
+    // 스터디 포인트 업데이트
+    const updatedStudy = await prisma.study.update({
+      where: { id },
+      data: {
+        points: {
+          increment: earnedPoints,
+        },
+      },
+    });
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: {
+        studyId: updatedStudy.id,
+        earnedPoints,
+        totalPoints: updatedStudy.points,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 // 계층 연결
 studiesRouter.use('/:id/habits', habitRouter);
-studiesRouter.use('/:id/emojis', emojiRouter);
-
-// API 작성
 
 // --------- 1. POST /api/studies - 새 스터디 생성 -----------
 // 미들웨어와 스터디 스키마를 통해 req.body 코드 간소화
