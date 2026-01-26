@@ -50,11 +50,20 @@ export const createStudySchema = z.object({
 });
 
 // PATCH /:id 스터디 수정용 스키마
+// extend 시 password 제약조건이 사라지지 않도록 재정의
 export const updateStudySchema = createStudySchema
   .partial() //선택적으로 수정가능하게
   .extend({
-    password: z.string({ required_error: ERROR_MESSAGE.PASSWORD_REQUIRED }), //비밀번호만 필수로
+    password: z
+      .string({ required_error: ERROR_MESSAGE.PASSWORD_REQUIRED })
+      .min(8, { message: ERROR_MESSAGE.PASSWORD_MIN_LENGTH })
+      .max(12, { message: ERROR_MESSAGE.PASSWORD_MAX_LENGTH }),
   });
+
+// 주소창 params 검증용 스키마 -> id가 유효한 형식인지 검증
+export const paramsIdSchema = z.object({
+  id: z.string().cuid({ message: ERROR_MESSAGE.INVALID_ID_FORMAT }),
+});
 
 // POST /:id/check-password 비밀번호 검증용 스키마
 export const passwordCheckSchema = z.object({

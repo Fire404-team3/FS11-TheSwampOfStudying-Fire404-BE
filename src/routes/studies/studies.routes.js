@@ -2,11 +2,11 @@ import express from 'express';
 import { habitRouter } from '../habits/index.js';
 import { emojiRouter } from '../emojis/index.js';
 import { studiesRepository } from '#repository';
-import { NotFoundException, UnauthorizedException } from '#exceptions';
-import { ERROR_MESSAGE, HTTP_STATUS } from '#constants';
-import { validate } from '#middlewares';
+import { HTTP_STATUS } from '#constants';
+import { checkStudyOwner, validate } from '#middlewares';
 import {
   createStudySchema,
+  paramsIdSchema,
   passwordCheckSchema,
   updateStudySchema,
 } from './study.schema.js';
@@ -25,60 +25,36 @@ studiesRouter.use('/:id/emojis', emojiRouter);
 // API 작성
 
 // --------- 1. POST /api/studies - 새 스터디 생성 -----------
-// { 닉네임, 스터디 이름, 스터디에 대한 간단한 소개, 배경 선택, 비밀번호 및 비밀번호 확인 }을
-// 입력하여 새 스터디를 생성
+// 미들웨어와 스터디 스키마를 통해 req.body 코드 간소화
 
-studiesRouter.post('/', validate(createStudySchema), async (req, res, next) => {
-  try {
-    // 사용자가 보낸 바디에서 { 닉네임, 스터디이름, 스터디소개, 배경, 비밀번호 }를 꺼낸다
-    const { nickname, name, description, background, password } = req.body;
+studiesRouter.post(
+  '/',
+  validate('body', createStudySchema),
+  async (req, res, next) => {
+    try {
+      const newStudy = await studiesRepository.createStudy(req.body);
 
-    // 미들웨어에서 검사
-    // 바디에 다 담겨있다면 스터디.레포지토리 를 통해 스터디 테이블에 새로운 데이터를 생성하고, 결과를 담는다
-    const newStudy = await studiesRepository.createStudy({
-      nickname,
-      name,
-      description,
-      background,
-      password,
-    });
-
-    // 성공했다는 201번 코드와 방금 만든 스터디 정보를 보내준다
-    res.status(HTTP_STATUS.CREATED).json(newStudy);
-  } catch (error) {
-    // catch 위 과정에서 에러가 발생하면 next(error) 출력
-    next(error);
-  }
-});
+      res.status(HTTP_STATUS.CREATED).json(newStudy);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
 // --------- 2. POST /api/studies/:id/check-password - 비밀번호 검증 ------------
 // 3,4를 위한 권한 확인용, 모달(비밀번호 인증) 성공 시 3(수정), 4(삭제)를 할 수 있도록 사용
+// checkStudyOwner 미들웨어를 사용하여 중복코드 간소화
 
 studiesRouter.post(
   '/:id/check-password',
-  validate(passwordCheckSchema),
+  validate('params', paramsIdSchema),
+  validate('body', passwordCheckSchema),
+  checkStudyOwner,
   async (req, res, next) => {
     try {
-      // 사용자가 보낸 id는 params에서 password는 body에서 꺼낸다
-      const { id } = req.params;
-      const { password } = req.body;
-
-      // 레포지토리를 통해 받은 아이디와 일치하는 스터디 정보를 데이터베이스에서 찾아온다
-      const study = await studiesRepository.findStudyById(id);
-
-      // 만약 찾아온 스터디 정보가 없으면 404 에러를 응답보낸다
-      if (!study) {
-        throw new NotFoundException(ERROR_MESSAGE.STUDY_NOT_FOUND);
-      }
-      // 비밀번호가 다르다면 401 권한없음
-      if (study.password !== password) {
-        throw new UnauthorizedException(ERROR_MESSAGE.PASSWORD_REQUIRED);
-      }
-
-      // 스터디 정보가 있고 비밀번호가 있치하면 200
+      // checkStudyOwner를 통과하면(스터디 정보가 있고 비밀번호 일치) 200
       res.sendStatus(HTTP_STATUS.OK);
     } catch (error) {
-      // catch 위 과정에서 에러 발생시 next(error) 출력
       next(error);
     }
   },
@@ -86,79 +62,41 @@ studiesRouter.post(
 
 // --------- 3. PATCH /api/studies/:id - 특정 스터디 수정 -----------
 // { 비밀번호 }를 입력하여 (스터디 등록 시 입력했던 비밀번호와 일치할 경우), 스터디 정보 수정
+// checkStudyOwner 미들웨어를 사용하여 중복코드 간소화
 
 studiesRouter.patch(
   '/:id',
-  validate(updateStudySchema),
+  validate('params', paramsIdSchema),
+  validate('body', updateStudySchema),
+  checkStudyOwner,
   async (req, res, next) => {
     try {
-      // 사용자가 보낸 주소창에서 { 스터디 아이디 }를 꺼내고,
-      // 바디에서 { 비밀번호, 수정할 내용(이름, 내용, 배경) }을 꺼낸다
       const { id } = req.params;
-      const { password, name, description, background } = req.body;
+      const updatedStudy = await studiesRepository.updateStudy(id, req.body);
 
-      // 레포지토리를 통해 아이디와 일치하는 스터디를 찾아본다
-      const study = await studiesRepository.findStudyById(id);
-
-      // 만약 찾아온 스터디 정보가 없으면 404 error를 보낸다
-      if (!study) {
-        throw new NotFoundException(ERROR_MESSAGE.STUDY_NOT_FOUND);
-      }
-
-      // 만약 찾아온 스터디의 비밀번호가 사용자가 입력한 비밀번호와 다르다면 401(권한 없음)을 보낸다
-      if (study.password !== password) {
-        throw new UnauthorizedException(ERROR_MESSAGE.PASSWORD_REQUIRED);
-      }
-
-      // 비밀번호가 일치한다면 레포지토리를 통해 해당 스터디 정보를 새로운 내용으로 수정한다
-      const updatedStudy = await studiesRepository.updateStudy(id, {
-        name,
-        description,
-        background,
-      });
-
-      // 수정이 완료되면 성공했다는 200번 코드와 방금 수정한 스터디 정보를 보내준다
       res.status(HTTP_STATUS.OK).json(updatedStudy);
     } catch (error) {
-      // catch 위 과정에서 에러가 발생하면 next(error) 출력
       next(error);
     }
   },
 );
 
 // 4. DELETE /api/studies/:id - 특정 스터디 삭제
-// { 비밀번호 } 를 입력하여 (스터디 등록 시 입력했던 비밀번호와 일치할 경우), 스터디 삭제
+// checkStudyOwner 미들웨어를 사용하여 중복코드 간소화
 
 studiesRouter.delete(
   '/:id',
-  validate(passwordCheckSchema),
+  validate('params', paramsIdSchema),
+  validate('body', passwordCheckSchema),
+  checkStudyOwner,
   async (req, res, next) => {
     try {
-      // 사용자가 보낸 주소창에서 { 스터디 아이디 }를 꺼내고,
-      // 바디에서 { 비밀번호 }을 꺼낸다
       const { id } = req.params;
-      const { password } = req.body;
 
-      // 레포지토리를 통해 아이디와 일치하는 스터디를 찾아본다
-      const study = await studiesRepository.findStudyById(id);
-
-      // 만약 찾아온 스터디 정보가 없으면 404 error를 보낸다
-      if (!study) {
-        throw new NotFoundException(ERROR_MESSAGE.STUDY_NOT_FOUND);
-      }
-
-      // 만약 찾아온 스터디의 비밀번호가 사용자가 입력한 비밀번호와 다르다면 401(권한 없음)을 보낸다
-      if (study.password !== password) {
-        throw new UnauthorizedException(ERROR_MESSAGE.UNAUTHORIZED);
-      }
-
-      // 비밀번호가 일치한다면 레포지토리를 통해 해당 스터디를 삭제한다
       await studiesRepository.deleteStudy(id);
 
-      // 삭제완료되면 204번 코드를 보낸다
       res.sendStatus(HTTP_STATUS.NO_CONTENT);
     } catch (error) {
-      // catch 위 과정에서 에러가 발생하면 next(error) 출력
       next(error);
     }
   },

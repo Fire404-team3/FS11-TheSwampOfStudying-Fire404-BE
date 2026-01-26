@@ -1,19 +1,18 @@
 import { Prisma } from '#generated/prisma/client.ts';
 import { ERROR_MESSAGE, HTTP_STATUS, PRISMA_ERROR } from '#constants';
 import { HttpException } from '#exceptions';
+import { isDevelopment } from '#config';
 
 export const errorHandler = (err, req, res, _next) => {
   console.error(err.stack);
 
   // HttpException 상속 에러
-    const isDev = process.env.NODE_ENV === 'development';
-
   if (err instanceof HttpException) {
     return res.status(err.statusCode).json({
       success: false,
       message: err.message,
       // 개발환경일 때만 err.details 확인
-      ...(isDev && err.details && { details: err.details }),
+      ...(isDevelopment && err.details && { details: err.details }),
     });
   }
 
