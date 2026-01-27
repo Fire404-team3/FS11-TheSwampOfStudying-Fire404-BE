@@ -37,3 +37,33 @@ habitCheckRouter.post('/:id/check', async (req, res, next) => {
 });
 
 //체크하면 habitRecord에 해당 id 에 대한 checkDate 삭제 
+
+habitCheckRouter.delete('/:id/check', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { checkDate } = req.query;
+
+    if (!id) {
+      return res
+        .status(HTTP_STATUS.BAD_REQUEST)
+        .json({ error: ERROR_MESSAGE.HABIT_NOT_FOUND });
+    }
+
+    const deleted = await habitsRepository.deleteHabitCheckDate(
+      id,
+      checkDate
+    )
+
+    if (!deleted) {
+      return res
+        .status(HTTP_STATUS.BAD_REQUEST)
+      .json({message: '해당 날짜 기록 없음'})
+    }
+
+    console.log('삭제됨', deleted)
+    res.status(HTTP_STATUS.OK).json(deleted);
+
+  } catch (error) {
+    next(error)
+  }
+})
