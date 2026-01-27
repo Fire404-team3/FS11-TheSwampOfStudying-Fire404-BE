@@ -16,6 +16,14 @@ import { NotFoundException, BadRequestException } from '#exceptions';
 
 export const studiesRouter = express.Router();
 
+// :id 파라미터 검증 미들웨어
+studiesRouter.param('id', (req, res, next, id) => {
+  if (!id || id.trim() === '') {
+    return next(new BadRequestException('스터디 ID가 필요합니다.'));
+  }
+  next();
+});
+
 // GET /studies/:id - 스터디 상세 정보 + Top3 이모지
 studiesRouter.get('/:id', async (req, res, next) => {
   try {
@@ -37,14 +45,14 @@ studiesRouter.get('/:id', async (req, res, next) => {
       throw new NotFoundException(ERROR_MESSAGE.STUDY_NOT_FOUND);
     }
 
-    // password 제거 & emojiLogs -> top 3Emojis 변환
+    // password 제거 & emojiLogs -> top 3Emojis(topRankedEmojis) 변환
     const { password, emojiLogs, ...studyData } = study;
 
     res.status(HTTP_STATUS.OK).json({
       success: true,
       data: {
         ...studyData,
-        top3Emojis: emojiLogs.map(({ emojiType, count }) => ({
+        topRankedEmojis: emojiLogs.map(({ emojiType, count }) => ({
           emojiType,
           count,
         })),
@@ -115,8 +123,8 @@ studiesRouter.post('/:id/points', async (req, res, next) => {
       throw new BadRequestException('Minutes is required');
     }
 
-    if (typeof minutes !== 'number' || minutes <= 0) {
-      throw new BadRequestException('Minutes must be greater than 0');
+    if (!Number.isInteger(minutes) || minutes < 30) {
+      throw new BadRequestException('집중하는 시간은 최소 30분 이상이어야 합니다.');
     }
 
     // 스터디 존재 확인
