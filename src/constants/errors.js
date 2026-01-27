@@ -8,15 +8,34 @@ export const PRISMA_ERROR = {
 export const ERROR_MESSAGE = {
   // Study 관련
   STUDY_NOT_FOUND: 'Study not found',
-  NICKNAME_REQUIRED: 'Nickname is required',
-  STUDY_NAME_REQUIRED: 'Study name is required',
-  DESCRIPTION_REQUIRED: 'Description is required',
-  PASSWORD_REQUIRED: 'Password is required',
+  REQUIRED_INFORMATION: 'Please enter required information',
   FAILED_TO_FETCH_STUDIES: 'Failed to fetch studies',
   FAILED_TO_FETCH_STUDY: 'Failed to fetch study',
   FAILED_TO_CREATE_STUDY: 'Failed to create study',
   FAILED_TO_UPDATE_STUDY: 'Failed to update study',
   FAILED_TO_DELETE_STUDY: 'Failed to delete study',
+
+  // 유효성 검사
+  NICKNAME_REQUIRED: '닉네임은 필수입니다.',
+  NICKNAME_MIN_LENGTH: '닉네임은 2글자 이상이어야 합니다.',
+  NICKNAME_MAX_LENGTH: '닉네임은 10글자 이내여야 합니다.',
+
+  STUDY_NAME_REQUIRED: '스터디 이름은 필수입니다.',
+  STUDY_NAME_MIN_LENGTH: '스터디 이름은 2글자 이상이어야 합니다.',
+  STUDY_NAME_MAX_LENGTH: '스터디 이름은 10글자 이내여야 합니다.',
+
+  DESCRIPTION_REQUIRED: '소개글은 필수입니다.',
+  DESCRIPTION_MIN_LENGTH: '소개글은 2글자 이상이어야 합니다.',
+  DESCRIPTION_MAX_LENGTH: '소개글은 50글자 이내여야 합니다.',
+
+  BACKGROUND_REQUIRED: '배경 색상을 반드시 선택해주세요.',
+  BACKGROUND_INVALID: '지원하지 않는 배경입니다.',
+
+  PASSWORD_REQUIRED: '비밀번호는 필수입니다.',
+  PASSWORD_MIN_LENGTH: '비밀번호는 8자리 이상이어야 합니다.',
+  PASSWORD_MAX_LENGTH: '비밀번호는 12자리 이내여야 합니다.',
+
+  INVALID_ID_FORMAT: '유효하지 않은 아이디 형식입니다.',
 
   // Habit 관련
   HABIT_NOT_FOUND: 'Habit not found',
@@ -55,9 +74,9 @@ export const ERROR_MESSAGE = {
   RESOURCE_CONFLICT: 'Resource conflict',
   INTERNAL_SERVER_ERROR: 'Internal server error',
 
-  // Validation 추후 key 값 추가
-  INVALID_INPUT: '',
-  VALIDATION_FAILED: '',
+  // Validation
+  INVALID_INPUT: '유효하지 않은 입력입니다.',
+  VALIDATION_FAILED: '유효성 검사에 실패했습니다.',
 
   // Auth 관련 추후 key 값 추가
   NO_AUTH_TOKEN: '',
