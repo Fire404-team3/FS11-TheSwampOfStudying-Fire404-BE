@@ -23,27 +23,16 @@ studyHabitsRouter.get('/', async (req, res,next) => {
         .json({ error: ERROR_MESSAGE.FAILED_TO_FETCH_STUDY });
     }
 
-    const weekdays = [
-      '일요일',
-      '월요일',
-      '화요일',
-      '수요일',
-      '목요일',
-      '금요일',
-      '토요일',
-    ];
-    const todayName = weekdays[new Date().getDay()];
-
-    const habitList = await studiesRepository.findStudyWithHabits(id, todayName);
+    const habitList = await studiesRepository.findStudyWithHabits(id);
     if (!habitList) {
       return res
         .status(HTTP_STATUS.NOT_FOUND)
         .json({ error: ERROR_MESSAGE.STUDY_NOT_FOUND });
     }
 
-    res.status(200).json({
+    res.status(HTTP_STATUS.OK).json({
       success: true,
-      message: `${id}의 스터디 ${todayName} 습관 목록 조회 성공`,
+      message: `${id}의 스터디 습관 목록 조회 성공`,
       data: habitList,
     });
   } catch (error) {

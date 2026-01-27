@@ -1,5 +1,5 @@
 import express from 'express';
-import { habitRouter } from '../habits/index.js';
+
 import { emojiRouter } from '../emojis/index.js';
 import { studiesRepository } from '#repository';
 import { HTTP_STATUS } from '#constants';
@@ -16,13 +16,13 @@ import { studyHabitsRouter } from './habits/study-habits.routes.js';
 export const studiesRouter = express.Router();
 
 // 계층 연결
-studiesRouter.use('/:id/habits', habitRouter);
+
 studiesRouter.use('/:id/emojis', emojiRouter);
 studiesRouter.use('/:id/habits', studyHabitsRouter);
 // --------- 1. POST /api/studies - 새 스터디 생성 -----------
 // 미들웨어와 스터디 스키마를 통해 req.body 코드 간소화
 
-studiesRouter.post(
+studiesRouter.post(  
   '/',
   validate('body', createStudySchema),
   async (req, res, next) => {
