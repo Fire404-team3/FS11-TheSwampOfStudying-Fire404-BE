@@ -19,6 +19,11 @@ export const checkStudyOwner = async (req, res, next) => {
       throw new NotFoundException(ERROR_MESSAGE.STUDY_NOT_FOUND);
     }
 
+    // 스터디의 비밀번호가 입력되지 않은 경우
+    if (!password) {
+      throw new UnauthorizedException(ERROR_MESSAGE.PASSWORD_REQUIRED);
+    }
+
     // 만약 찾아온 스터디의 비밀번호가 사용자가 입력한 비밀번호와 다르다면 401(권한 없음)을 보낸다
     if (study.password !== password) {
       throw new UnauthorizedException(ERROR_MESSAGE.PASSWORD_MISMATCH);
