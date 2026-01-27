@@ -32,6 +32,7 @@ export const ERROR_MESSAGE = {
   BACKGROUND_INVALID: '지원하지 않는 배경입니다.',
 
   PASSWORD_REQUIRED: '비밀번호는 필수입니다.',
+  PASSWORD_MISMATCH: '비밀번호가 일치하지 않습니다.',
   PASSWORD_MIN_LENGTH: '비밀번호는 8자리 이상이어야 합니다.',
   PASSWORD_MAX_LENGTH: '비밀번호는 12자리 이내여야 합니다.',
 
