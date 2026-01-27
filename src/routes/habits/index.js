@@ -11,9 +11,3 @@ router.use('/', habitRouter);
 router.use('/habitmodaltest', testRouter); // modal test: 제거대상 
 
 export { router as habitRouter }
-
-
-//---------------------------------------------
-// 클론시 있었던 내용
-// import express from 'express';
-// import { habitsRouter } from './habits.routes.js';

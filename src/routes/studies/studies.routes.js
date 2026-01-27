@@ -14,4 +14,3 @@ studiesRouter.use('/:id/habits', habitRouter);
 studiesRouter.use('/:id/emojis', emojiRouter);
 
 // API 작성
-
