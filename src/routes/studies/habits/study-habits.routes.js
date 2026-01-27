@@ -1,19 +1,27 @@
 import express from 'express';
 import { ERROR_MESSAGE, HTTP_STATUS } from '#constants';
+import { studiesRepository } from '#repository';
 
-import { findstudyWithHabits } from '../../../Repository/studies.repository.js';
 
 //부모 라우터의 id를 자식 라우터에서도 사용가능
 export const studyHabitsRouter = express.Router({
   mergeParams: true,
 });
 
+
+
 // API 작성
 //특정 아이디 habit 목록 가져오기
 // 포스트맨 검색 -> [ /studies/:id/habits ]
-studyHabitsRouter.get('/', async (req, res) => {
+studyHabitsRouter.get('/', async (req, res,next) => {
   try {
     const { id } = req.params;
+
+    if (!id) {
+      res
+        .status(HTTP_STATUS.BAD_REQUEST)
+        .json({ error: ERROR_MESSAGE.FAILED_TO_FETCH_STUDY });
+    }
 
     const weekdays = [
       '일요일',
@@ -26,16 +34,12 @@ studyHabitsRouter.get('/', async (req, res) => {
     ];
     const todayName = weekdays[new Date().getDay()];
 
-    const habitList = await findstudyWithHabits(
-      id,
-      todayName,
-    );
+    const habitList = await studiesRepository.findStudyWithHabits(id, todayName);
     if (!habitList) {
       return res
         .status(HTTP_STATUS.NOT_FOUND)
         .json({ error: ERROR_MESSAGE.STUDY_NOT_FOUND });
     }
-    
 
     res.status(200).json({
       success: true,
@@ -43,9 +47,6 @@ studyHabitsRouter.get('/', async (req, res) => {
       data: habitList,
     });
   } catch (error) {
-    console.error('GET /studies/:id/habits ERROR >>>', error)
-    res
-      .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
-      .json({ error: ERROR_MESSAGE.FAILED_TO_FETCH_HABITS });
+    next(error);
   }
 });
