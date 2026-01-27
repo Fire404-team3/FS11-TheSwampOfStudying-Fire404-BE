@@ -69,3 +69,19 @@ export const paramsIdSchema = z.object({
 export const passwordCheckSchema = z.object({
   password: z.string({ required_error: ERROR_MESSAGE.PASSWORD_REQUIRED }),
 });
+
+// POST /:id/emojis 이모지 추가용 스키마
+export const emojiSchema = z.object({
+  emojiType: z
+    .string({ required_error: ERROR_MESSAGE.EMOJI_TYPE_REQUIRED })
+    .trim()
+    .min(1, { message: ERROR_MESSAGE.EMOJI_TYPE_REQUIRED }),
+});
+
+// POST /:id/points 포인트 적립용 스키마
+export const pointsSchema = z.object({
+  minutes: z
+    .number({ required_error: ERROR_MESSAGE.MINUTES_REQUIRED })
+    .int({ message: ERROR_MESSAGE.MINUTES_INTEGER })
+    .min(30, { message: ERROR_MESSAGE.MINUTES_MIN_VALUE }),
+});
