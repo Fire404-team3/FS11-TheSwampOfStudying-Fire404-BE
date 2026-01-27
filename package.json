@@ -15,7 +15,9 @@
     "#constants": "./src/constants/index.js",
     "#utils": "./src/utils/index.js",
     "#middlewares": "./src/middlewares/index.js",
-    "#exceptions": "./src/exceptions/index.js"
+    "#exceptions": "./src/exceptions/index.js",
+    "#controllers/*": "./src/controllers/*",
+    "#services/*": "./src/services/*"
   },
   "scripts": {
     "dev": "nodemon --env-file=./env/.env.development src/server.js",
