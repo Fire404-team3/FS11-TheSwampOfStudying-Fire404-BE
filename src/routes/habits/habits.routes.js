@@ -1,34 +1,21 @@
-
 import { Router } from 'express';
 import { prisma } from '#db/prisma.js';
 import { HTTP_STATUS } from '#constants';
-import {
-  findActiveByStudyId,
-  deleteHabits,
-  createHabits,
-  updateHabits,
-} from '#repository';
-
+import { habitsRepository } from '#repository';
+import { habitsSchema } from './habits.schema.js';
+import { validateObject } from '#middlewares';
 export const habitRouter = Router();
 
 // 특정 Study의 습관을 삭제/신규/수정을 동기화 처리하기 위한 로직
-habitRouter.put('/:studyId', async (req, res, next) => {
+habitRouter.put('/:studyId', validateObject(habitsSchema), 
+  async (req, res, next) => {
   try {
     const { studyId } = req.params;
     const habits = req.body;
 
-    //방어 코드 : habit이름이 빈공백인 경우 ""인 경우의 입력 차단-postman등 외부 유입
-    for (const habit of habits) {
-      if (!habit.name || habit.name.trim() === '') {
-        return res
-          .status(HTTP_STATUS.BAD_REQUEST)
-          .json({ message: '습관 이름은 필수입니다.' });
-      }
-    }
-
     await prisma.$transaction(async (tx) => {
       //기존 Habit중 현재 isDelted:False 전체습관 조회
-      const existingHabits = await findActiveByStudyId(tx, studyId);
+      const existingHabits = await habitsRepository.findActiveByStudyId(tx, studyId);
 
       // Delted 처리할 대상을 선별 - 새로 넘어오지 않은 Habits 추출(isDeleted : true처리 목적)
       const habitsToDelete = existingHabits.filter(
@@ -48,9 +35,9 @@ habitRouter.put('/:studyId', async (req, res, next) => {
 
       // 삭제/신규/수정 일괄 처리
       await Promise.all([
-        deleteHabits(tx, habitsToDelete),
-        createHabits(tx, studyId, habitsToCreate),
-        updateHabits(tx, habitsToUpdate),
+        habitsRepository.deleteHabits(tx, habitsToDelete),
+        habitsRepository.createHabits(tx, studyId, habitsToCreate),
+        habitsRepository.updateHabits(tx, habitsToUpdate),
       ]);
     });
 

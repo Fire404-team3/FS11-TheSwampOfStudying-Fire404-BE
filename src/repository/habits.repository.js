@@ -1,5 +1,5 @@
 // transaction 처리전 데이타 확인
-export const findActiveByStudyId = (tx, studyId) => {
+const findActiveByStudyId = (tx, studyId) => {
   return tx.habit.findMany({
     where: {
       studyId,
@@ -8,8 +8,8 @@ export const findActiveByStudyId = (tx, studyId) => {
   });
 };
 
-// 삭제 처리 : isDelteted를 true로 설정
-export const deleteHabits = (tx, habits) => {
+// 습관 단독 삭제 시, 과거 기록 보존을 위한 논리 삭제(Soft Delete) 처리
+const deleteHabits = (tx, habits) => {
   return Promise.all(
     habits.map((habit) =>
       tx.habit.update({
@@ -21,7 +21,7 @@ export const deleteHabits = (tx, habits) => {
 };
 
 // habit 신규 생성
-export const createHabits = (tx, studyId, habits) => {
+const createHabits = (tx, studyId, habits) => {
   return Promise.all(
     habits.map((habit) =>
       tx.habit.create({
@@ -35,7 +35,7 @@ export const createHabits = (tx, studyId, habits) => {
 };
 
 // Habit name 수정
-export const updateHabits = (tx, habits) => {
+const updateHabits = (tx, habits) => {
   return Promise.all(
     habits.map((habit) =>
       tx.habit.update({
@@ -44,4 +44,11 @@ export const updateHabits = (tx, habits) => {
       }),
     ),
   );
+};
+
+export const habitsRepository = {
+  findActiveByStudyId,
+  deleteHabits,
+  createHabits,
+  updateHabits
 }

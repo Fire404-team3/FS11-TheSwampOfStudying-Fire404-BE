@@ -22,10 +22,6 @@ studiesRouter.get('/', (req, res) => {
 studiesRouter.use('/:id/habits', habitRouter);
 studiesRouter.use('/:id/emojis', emojiRouter);
 
-// API 작성
-<<<<<<< HEAD
-=======
-
 // --------- 1. POST /api/studies - 새 스터디 생성 -----------
 // 미들웨어와 스터디 스키마를 통해 req.body 코드 간소화
 
@@ -103,4 +99,4 @@ studiesRouter.delete(
     }
   },
 );
->>>>>>> develop
+
