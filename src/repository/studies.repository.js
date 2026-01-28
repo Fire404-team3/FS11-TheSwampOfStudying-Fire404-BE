@@ -8,6 +8,9 @@ export const studiesRepository = {
         orderBy,
         take,
         skip,
+        include: {
+          emojiLogs: true,
+        },
       }),
       prisma.study.count({
         where,
