@@ -36,6 +36,7 @@ studiesRouter.get('/', async (req, res, next) => {
           OR: [
             { name: { contains: search, mode: 'insensitive' } },
             { description: { contains: search, mode: 'insensitive' } },
+            { nickname: { contains: search, mode: 'insensitive' } },
           ],
         }
       : {};
