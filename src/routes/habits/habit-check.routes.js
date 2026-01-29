@@ -7,7 +7,6 @@ export const habitCheckRouter = express.Router();
 //habit 토글 체크 api
 //POST /habits/:id/check
 //체크하면 habitRecord에 해당 id 에 대한 checkDate 생성
-
 habitCheckRouter.post('/:id/check', async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -29,14 +28,14 @@ habitCheckRouter.post('/:id/check', async (req, res, next) => {
       id,
       checkDate,
     );
-    
+
     res.status(HTTP_STATUS.CREATED).json(newHabitCheckDate);
   } catch (error) {
     next(error);
   }
 });
 
-//체크하면 habitRecord에 해당 id 에 대한 checkDate 삭제 
+//체크하면 habitRecord에 해당 id 에 대한 checkDate 삭제
 
 habitCheckRouter.delete('/:id/check', async (req, res, next) => {
   try {
@@ -49,21 +48,17 @@ habitCheckRouter.delete('/:id/check', async (req, res, next) => {
         .json({ error: ERROR_MESSAGE.HABIT_NOT_FOUND });
     }
 
-    const deleted = await habitsRepository.deleteHabitCheckDate(
-      id,
-      checkDate
-    )
+    const deleted = await habitsRepository.deleteHabitCheckDate(id, checkDate);
 
     if (!deleted) {
       return res
         .status(HTTP_STATUS.BAD_REQUEST)
-      .json({message: '해당 날짜 기록 없음'})
+        .json({ message: '해당 날짜 기록 없음' });
     }
 
-    console.log('삭제됨', deleted)
+    console.log('삭제됨', deleted);
     res.status(HTTP_STATUS.OK).json(deleted);
-
   } catch (error) {
-    next(error)
+    next(error);
   }
-})
+});

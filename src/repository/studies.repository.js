@@ -29,8 +29,7 @@ function deleteStudy(id) {
   });
 }
 
-
-//오늘의 습관 
+//오늘의 습관
 //특정 study(id)의 정보(id, name, nickname)와 연관된 habits를 조회
 function findStudyWithHabits(id) {
   return prisma.study.findUnique({
@@ -44,6 +43,18 @@ function findStudyWithHabits(id) {
   });
 }
 
+function fetchAllResources(id) {
+  return prisma.study.findUnique({
+    where: { id: String(id) },
+    include: {
+      habits: {
+        include: { records: true },
+      },
+      emojiLogs: true,
+    },
+  });
+}
+
 export const studiesRepository = {
   createStudy,
   findStudyById,
@@ -51,4 +62,5 @@ export const studiesRepository = {
   deleteStudy,
   //오늘의 습관
   findStudyWithHabits,
+  fetchAllResources,
 };
