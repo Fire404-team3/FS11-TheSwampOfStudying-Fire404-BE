@@ -3,11 +3,9 @@
 
 import { Router } from 'express';
 import { testRouter } from './test.routes.js'; // modal test: 제거대상 
-import { habitRouter } from './habits.routes.js';
+import { habitsRouter } from './habits.routes.js';
 
 const router = Router();
-
-router.use('/', habitRouter);
+router.use('/', habitsRouter); //habits.routes.js로 중계
 router.use('/habitmodaltest', testRouter); // modal test: 제거대상 
-
-export { router as habitRouter }
+export { router as habitRouter } //routes/index.js
