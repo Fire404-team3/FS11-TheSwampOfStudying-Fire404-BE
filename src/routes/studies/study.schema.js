@@ -2,7 +2,7 @@ import { ERROR_MESSAGE } from '#constants';
 import z from 'zod';
 
 // 배경 옵션 8개
-const STUDY_BACKGROUNDS = [
+export const STUDY_BACKGROUNDS = [
   'colorGreen',
   'colorYellow',
   'colorBlue',
