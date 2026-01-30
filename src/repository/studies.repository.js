@@ -31,17 +31,24 @@ function deleteStudy(id) {
 
 //오늘의 습관
 //특정 study(id)의 정보(id, name, nickname)와 연관된 habits를 조회
+
+
 function findStudyWithHabits(id) {
   return prisma.study.findUnique({
     where: { id: String(id) },
     select: {
-      // id: true,
+      id: true,
       name: true,
       nickname: true,
-      habits: true,
+      habits: {
+        where: {
+          isDeleted: false,
+        }
+      },
     },
   });
 }
+
 
 function fetchAllResources(id) {
   return prisma.study.findUnique({
