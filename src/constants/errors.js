@@ -7,7 +7,7 @@ export const PRISMA_ERROR = {
 // 에러 메세지 상수
 export const ERROR_MESSAGE = {
   // Study 관련
-  STUDY_NOT_FOUND: 'Study not found',
+  STUDY_NOT_FOUND: '스터디를 찾을 수 없습니다.',
   REQUIRED_INFORMATION: 'Please enter required information',
   FAILED_TO_FETCH_STUDIES: 'Failed to fetch studies',
   FAILED_TO_FETCH_STUDY: 'Failed to fetch study',
@@ -46,6 +46,8 @@ export const ERROR_MESSAGE = {
   FAILED_TO_CREATE_HABIT: 'Failed to create habit',
   FAILED_TO_UPDATE_HABIT: 'Failed to update habit',
   FAILED_TO_DELETE_HABIT: 'Failed to delete habit',
+  HABIT_MIN_LENGTH: '습관 등록은 2자리 이상이어야 합니다.',
+  HABIT_MAX_LENGTH: '습관 등록은 20자리 이내이어야 합니다.',
 
   // HabitRecord 관련
   HABIT_ID_REQUIRED: 'Habit id is required',
@@ -56,17 +58,16 @@ export const ERROR_MESSAGE = {
   FAILED_TO_UPDATE_HABIT_RECORD: 'Failed to update habit record',
   FAILED_TO_DELETE_HABIT_RECORD: 'Failed to delete habit record',
 
+  // Points 관련
+  MINUTES_REQUIRED: '집중 시간을 설정해 주세요.',
+  MINUTES_INTEGER: '집중 시간은 분 단위로 설정해 주세요.',
+  MINUTES_MIN_VALUE: '집중하는 시간은 최소 30분 이상이어야 합니다.',
+
   // Emoji 관련
-  EMOJI_TYPE_REQUIRED: 'Emoji type is required',
-  EMOJI_TYPE_ALREADY_EXISTS: 'Emoji type already exists in this study',
-  FAILED_TO_FETCH_EMOJIS: 'Failed to fetch Emojis',
-  FAILED_TO_FETCH_EMOJI: 'Failed to fetch Emoji',
-  FAILED_TO_CREATE_EMOJI: 'Failed to create Emoji',
-  FAILED_TO_UPDATE_EMOJI: 'Failed to update Emoji',
-  FAILED_TO_DELETE_EMOJI: 'Failed to delete Emoji',
+  EMOJI_TYPE_REQUIRED: '이모지를 생성해 주세요.',
 
   // common 에러
-  STUDY_ID_REQUIRED: 'Study id is required',
+  STUDY_ID_REQUIRED: '스터디를 생성해 주세요.',
 
   // 일반 에러 (Exception 기본값으로 사용)
   BAD_REQUEST: 'Bad request',
