@@ -8,7 +8,10 @@ async function findAndCountAll({ where, orderBy, take, skip }) {
       take,
       skip,
       include: {
-        emojiLogs: true,
+        emojiLogs: {
+          orderBy: { count: 'desc' },
+          take: 3,
+        },
       },
     }),
     prisma.study.count({
