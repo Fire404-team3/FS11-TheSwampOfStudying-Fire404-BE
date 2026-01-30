@@ -96,3 +96,4 @@ studiesRouter.delete(
     }
   },
 );
+
