@@ -1,6 +1,5 @@
 import express from 'express';
 import { habitRouter } from '../habits/index.js';
-import { emojiRouter } from '../emojis/index.js';
 import { studiesRepository } from '#repository';
 import { checkStudyOwner, validate } from '#middlewares';
 import { NotFoundException } from '#exceptions';
@@ -252,4 +251,3 @@ studiesRouter.delete(
 
 // 계층 연결
 studiesRouter.use('/:id/habits', habitRouter);
-studiesRouter.use('/:id/emojis', emojiRouter);
