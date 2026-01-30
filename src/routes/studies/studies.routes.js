@@ -17,6 +17,7 @@ import { HttpException } from '#exceptions';
 import { studyHabitsRouter } from './habits/study-habits.routes.js';
 
 export const studiesRouter = express.Router();
+studiesRouter.use('/:id/habits', studyHabitsRouter);
 
 // GET /studies/:id - 스터디 상세 정보 + Top3 이모지
 studiesRouter.get(
