@@ -2,7 +2,6 @@ import express from 'express';
 import { habitRouter } from '../habits/index.js';
 import { emojiRouter } from '../emojis/index.js';
 import { studiesRepository } from '#repository';
-import { HTTP_STATUS, ERROR_MESSAGE } from '#constants';
 import { checkStudyOwner, validate } from '#middlewares';
 import { NotFoundException } from '#exceptions';
 import {
@@ -13,6 +12,8 @@ import {
   pointsSchema,
   updateStudySchema,
 } from './study.schema.js';
+import { ERROR_MESSAGE, HTTP_STATUS } from '#constants';
+import { HttpException } from '#exceptions';
 
 export const studiesRouter = express.Router();
 
@@ -112,6 +113,62 @@ studiesRouter.post(
   },
 );
 
+studiesRouter.get('/', async (req, res, next) => {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      sort = 'latest',
+      order = 'desc',
+      search,
+    } = req.query;
+
+    const pageNum = Math.max(parseInt(page, 10) || 1, 1);
+    const take = Math.max(parseInt(limit, 10) || 10, 1);
+    const skip = (pageNum - 1) * take;
+
+    const sortOrder = order.toLowerCase() === 'asc' ? 'asc' : 'desc';
+    const sortField = sort === 'points' ? 'points' : 'createdAt';
+
+    const whereClause = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' } },
+            { description: { contains: search, mode: 'insensitive' } },
+            { nickname: { contains: search, mode: 'insensitive' } },
+          ],
+        }
+      : {};
+
+    const { studies, totalCount } = await studiesRepository.findAndCountAll({
+      where: whereClause,
+      orderBy: {
+        [sortField]: sortOrder,
+      },
+      take: take,
+      skip: skip,
+    });
+
+    res.status(HTTP_STATUS.OK).json({
+      data: studies,
+      meta: {
+        page: pageNum,
+        limit: take,
+        totalCount: totalCount,
+      },
+    });
+  } catch (error) {
+    // console.error('스터디 조회중 에러 발생', error);
+    // res.status(500).json({ message: '서버 에러 발생' });
+    const serverError = new HttpException(
+      HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      ERROR_MESSAGE.FAILED_TO_FETCH_STUDIES,
+      error.message,
+    );
+
+    next(serverError);
+  }
+});
 // 계층 연결
 studiesRouter.use('/:id/habits', habitRouter);
 
