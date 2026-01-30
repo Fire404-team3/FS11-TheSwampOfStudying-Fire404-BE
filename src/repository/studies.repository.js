@@ -35,10 +35,14 @@ function findStudyWithHabits(id) {
   return prisma.study.findUnique({
     where: { id: String(id) },
     select: {
-      // id: true,
+      id: true,
       name: true,
       nickname: true,
-      habits: true,
+      habits: {
+        where: {
+          isDeleted: false,
+        }
+      },
     },
   });
 }
