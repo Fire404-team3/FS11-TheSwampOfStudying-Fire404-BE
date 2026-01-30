@@ -1,7 +1,6 @@
 import express from 'express';
 import { studyRouter } from './studies/index.js';
 import { habitRouter } from './habits/index.js';
-import { emojiRouter } from './emojis/index.js';
 
 export const router = express.Router();
 

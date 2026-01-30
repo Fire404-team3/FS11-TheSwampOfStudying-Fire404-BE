@@ -3,16 +3,115 @@ import { habitRouter } from '../habits/index.js';
 import { emojiRouter } from '../emojis/index.js';
 import { studiesRepository } from '#repository';
 import { checkStudyOwner, validate } from '#middlewares';
+import { NotFoundException } from '#exceptions';
 import {
   createStudySchema,
+  emojiSchema,
   paramsIdSchema,
   passwordCheckSchema,
+  pointsSchema,
   updateStudySchema,
 } from './study.schema.js';
 import { ERROR_MESSAGE, HTTP_STATUS } from '#constants';
 import { HttpException } from '#exceptions';
 
 export const studiesRouter = express.Router();
+
+// GET /studies/:id - 스터디 상세 정보 + Top3 이모지
+studiesRouter.get(
+  '/:id',
+  validate('params', paramsIdSchema),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+
+      const study = await studiesRepository.findStudyWithTopEmojis(id);
+
+      if (!study) {
+        throw new NotFoundException(ERROR_MESSAGE.STUDY_NOT_FOUND);
+      }
+
+      // password 제거 & emojiLogs -> topRankedEmojis 변환
+      const { _password, emojiLogs, ...studyData } = study;
+
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        data: {
+          ...studyData,
+          topRankedEmojis: emojiLogs.map(({ emojiType, count }) => ({
+            emojiType,
+            count,
+          })),
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+// POST /studies/:id/emojis - 응원 이모지 카운트 증가
+studiesRouter.post(
+  '/:id/emojis',
+  validate('params', paramsIdSchema),
+  validate('body', emojiSchema),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { emojiType } = req.body;
+
+      const study = await studiesRepository.findStudyById(id);
+
+      if (!study) {
+        throw new NotFoundException(ERROR_MESSAGE.STUDY_NOT_FOUND);
+      }
+
+      const emoji = await studiesRepository.upsertEmoji(id, emojiType);
+
+      res.status(HTTP_STATUS.CREATED).json({
+        success: true,
+        data: emoji,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+// POST /studies/:id/points - 공부 시간 비례 포인트 적립
+studiesRouter.post(
+  '/:id/points',
+  validate('params', paramsIdSchema),
+  validate('body', pointsSchema),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { minutes } = req.body;
+
+      const study = await studiesRepository.findStudyById(id);
+
+      if (!study) {
+        throw new NotFoundException(ERROR_MESSAGE.STUDY_NOT_FOUND);
+      }
+
+      // 포인트 계산: 기본 3p + 10분당 1p
+      const earnedPoints = 3 + Math.floor(minutes / 10);
+
+      const updatedStudy = await studiesRepository.addPoints(id, earnedPoints);
+
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        data: {
+          studyId: updatedStudy.id,
+          earnedPoints,
+          totalPoints: updatedStudy.points,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
 studiesRouter.get('/', async (req, res, next) => {
   try {
@@ -72,9 +171,6 @@ studiesRouter.get('/', async (req, res, next) => {
 });
 // 계층 연결
 studiesRouter.use('/:id/habits', habitRouter);
-studiesRouter.use('/:id/emojis', emojiRouter);
-
-// API 작성
 
 // --------- 1. POST /api/studies - 새 스터디 생성 -----------
 // 미들웨어와 스터디 스키마를 통해 req.body 코드 간소화
