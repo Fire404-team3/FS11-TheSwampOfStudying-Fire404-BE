@@ -70,9 +70,6 @@ studiesRouter.get('/', async (req, res, next) => {
     next(serverError);
   }
 });
-// 계층 연결
-studiesRouter.use('/:id/habits', habitRouter);
-studiesRouter.use('/:id/emojis', emojiRouter);
 
 // API 작성
 
@@ -85,7 +82,7 @@ studiesRouter.post(
   async (req, res, next) => {
     try {
       const newStudy = await studiesRepository.createStudy(req.body);
-
+      
       res.status(HTTP_STATUS.CREATED).json(newStudy);
     } catch (error) {
       next(error);
@@ -125,7 +122,7 @@ studiesRouter.patch(
     try {
       const { id } = req.params;
       const updatedStudy = await studiesRepository.updateStudy(id, req.body);
-
+      
       res.status(HTTP_STATUS.OK).json(updatedStudy);
     } catch (error) {
       next(error);
@@ -144,12 +141,16 @@ studiesRouter.delete(
   async (req, res, next) => {
     try {
       const { id } = req.params;
-
+      
       await studiesRepository.deleteStudy(id);
-
+      
       res.sendStatus(HTTP_STATUS.NO_CONTENT);
     } catch (error) {
       next(error);
     }
   },
 );
+
+// 계층 연결
+studiesRouter.use('/:id/habits', habitRouter);
+studiesRouter.use('/:id/emojis', emojiRouter);
