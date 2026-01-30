@@ -46,6 +46,8 @@ export const ERROR_MESSAGE = {
   FAILED_TO_CREATE_HABIT: 'Failed to create habit',
   FAILED_TO_UPDATE_HABIT: 'Failed to update habit',
   FAILED_TO_DELETE_HABIT: 'Failed to delete habit',
+  HABIT_MIN_LENGTH: '습관 등록은 2자리 이상이어야 합니다.',
+  HABIT_MAX_LENGTH: '습관 등록은 20자리 이내이어야 합니다.',
 
   // HabitRecord 관련
   HABIT_ID_REQUIRED: 'Habit id is required',

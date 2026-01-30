@@ -13,6 +13,8 @@ import {
 } from './study.schema.js';
 import { ERROR_MESSAGE, HTTP_STATUS } from '#constants';
 import { HttpException } from '#exceptions';
+//오늘의 습관
+import { studyHabitsRouter } from './habits/study-habits.routes.js';
 
 export const studiesRouter = express.Router();
 
@@ -168,13 +170,14 @@ studiesRouter.get('/', async (req, res, next) => {
     next(serverError);
   }
 });
-// 계층 연결
-studiesRouter.use('/:id/habits', habitRouter);
+
+
+// API 작성
 
 // --------- 1. POST /api/studies - 새 스터디 생성 -----------
 // 미들웨어와 스터디 스키마를 통해 req.body 코드 간소화
 
-studiesRouter.post(
+studiesRouter.post(  
   '/',
   validate('body', createStudySchema),
   async (req, res, next) => {
