@@ -3,5 +3,3 @@ env/*
 !env/.env.example
 .DS_Store
 generated/
-src/routes/habits/test.routes.js
-src/routes/habits/index.test.js
