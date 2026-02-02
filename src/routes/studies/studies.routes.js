@@ -139,13 +139,7 @@ studiesRouter.get(
         },
       });
     } catch (error) {
-      console.error('DB 에러 상세 내용:', error);
-      const serverError = new HttpException(
-        HTTP_STATUS.INTERNAL_SERVER_ERROR,
-        ERROR_MESSAGE.FAILED_TO_FETCH_STUDIES,
-        error.message,
-      );
-      next(serverError);
+      next(error);
     }
   },
 );
