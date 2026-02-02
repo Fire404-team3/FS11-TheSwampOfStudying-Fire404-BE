@@ -17,6 +17,7 @@ import { HttpException } from '#exceptions';
 // import { studyHabitsRouter } from './habits/study-habits.routes.js';
 
 export const studiesRouter = express.Router();
+studiesRouter.use('/:id/habits', studyHabitsRouter);
 
 // habits/resources
 //상세페이지
