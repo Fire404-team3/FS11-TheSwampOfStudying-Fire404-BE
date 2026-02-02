@@ -1,4 +1,5 @@
 import express from 'express';
+import { endOfWeek, startOfWeek } from 'date-fns';
 import { habitRouter } from '../habits/index.js';
 import { studiesRepository } from '#repository';
 import { checkStudyOwner, validate } from '#middlewares';
@@ -18,12 +19,14 @@ import { HttpException } from '#exceptions';
 
 export const studiesRouter = express.Router();
 
-// habits/resources
 //상세페이지
 // 포스트맨 검색 -> [ /studies/:id/ ]
 studiesRouter.get('/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
+
+    const weekStat = startOfWeek(new Date(),{weekStartsOn:1});
+    const weekEnd = endOfWeek(new Date(),{weekStartsOn:1});
 
     if (!id) {
       res
@@ -31,7 +34,7 @@ studiesRouter.get('/:id', async (req, res, next) => {
         .json({ error: ERROR_MESSAGE.FAILED_TO_FETCH_STUDY });
     }
 
-    const studyAllResources = await studiesRepository.fetchAllResources(id);
+    const studyAllResources = await studiesRepository.fetchAllResources(id,weekStat,weekEnd);
     if (!studyAllResources) {
       return res
         .status(HTTP_STATUS.NOT_FOUND)
