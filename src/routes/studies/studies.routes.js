@@ -14,9 +14,39 @@ import {
 import { ERROR_MESSAGE, HTTP_STATUS } from '#constants';
 import { HttpException } from '#exceptions';
 //오늘의 습관
-import { studyHabitsRouter } from './habits/study-habits.routes.js';
+// import { studyHabitsRouter } from './habits/study-habits.routes.js';
 
 export const studiesRouter = express.Router();
+
+// habits/resources
+//상세페이지
+// 포스트맨 검색 -> [ /studies/:id/ ]
+studiesRouter.get('/:id', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      res
+        .status(HTTP_STATUS.BAD_REQUEST)
+        .json({ error: ERROR_MESSAGE.FAILED_TO_FETCH_STUDY });
+    }
+
+    const studyAllResources = await studiesRepository.fetchAllResources(id);
+    if (!studyAllResources) {
+      return res
+        .status(HTTP_STATUS.NOT_FOUND)
+        .json({ error: ERROR_MESSAGE.STUDY_NOT_FOUND });
+    }
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: `${id}의 전체 정보 조회 성공`,
+      data: studyAllResources,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
 
 // GET /studies/:id - 스터디 상세 정보 + Top3 이모지
 studiesRouter.get(
@@ -251,6 +281,38 @@ studiesRouter.delete(
     }
   },
 );
+
+
+// 오늘의 습관 
+
+studiesRouter.get('/:id/habits', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      res
+        .status(HTTP_STATUS.BAD_REQUEST)
+        .json({ error: ERROR_MESSAGE.FAILED_TO_FETCH_STUDY });
+    }
+
+    const habitList = await studiesRepository.findStudyWithHabits(id);
+    if (!habitList) {
+      return res
+        .status(HTTP_STATUS.NOT_FOUND)
+        .json({ error: ERROR_MESSAGE.STUDY_NOT_FOUND });
+    }
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: `${id}의 스터디 습관 목록 조회 성공`,
+      data: habitList,
+    });
+
+  } catch (error) {
+    next(error);
+  }
+});
+
 
 // 계층 연결
 studiesRouter.use('/:id/habits', habitRouter);

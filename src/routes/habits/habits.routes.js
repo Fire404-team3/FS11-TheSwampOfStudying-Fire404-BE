@@ -88,7 +88,6 @@ habitsRouter.post('/:id/check', async (req, res, next) => {
 });
 
 //체크하면 habitRecord에 해당 id 에 대한 checkDate 삭제
-
 habitsRouter.delete('/:id/check', async (req, res, next) => {
   try {
     const { id } = req.params;

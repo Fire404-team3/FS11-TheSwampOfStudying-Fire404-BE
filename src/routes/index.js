@@ -1,6 +1,7 @@
 import express from 'express';
 import { studyRouter } from './studies/index.js';
 import { habitRouter } from './habits/index.js';
+// import { studyHabitsRouter } from './studies/habits/study-habits.routes.js';
 
 export const router = express.Router();
 
