@@ -6,6 +6,7 @@ import { NotFoundException } from '#exceptions';
 import {
   createStudySchema,
   emojiSchema,
+  findAllSchema,
   paramsIdSchema,
   passwordCheckSchema,
   pointsSchema,
@@ -114,76 +115,68 @@ studiesRouter.post(
   },
 );
 
-studiesRouter.get('/', async (req, res, next) => {
-  try {
-    const {
-      page = 1,
-      limit = 10,
-      sort = 'latest',
-      order = 'desc',
-      search,
-    } = req.query;
+studiesRouter.get(
+  '/',
+  validate('query', findAllSchema),
+  async (req, res, next) => {
+    try {
+      const { page, limit, sort, order, search } = req.query;
 
-    const pageNum = Math.max(parseInt(page, 10) || 1, 1);
-    const take = Math.max(parseInt(limit, 10) || 10, 1);
-    const skip = (pageNum - 1) * take;
+      const pageNum = Number(page);
+      const take = Number(limit);
+      const skip = (pageNum - 1) * take;
 
-    const sortOrder = order.toLowerCase() === 'asc' ? 'asc' : 'desc';
-    const sortField = sort === 'points' ? 'points' : 'createdAt';
+      const whereClause = search
+        ? {
+            OR: [
+              { name: { contains: search, mode: 'insensitive' } },
+              { description: { contains: search, mode: 'insensitive' } },
+              { nickname: { contains: search, mode: 'insensitive' } },
+            ],
+          }
+        : {};
 
-    const whereClause = search
-      ? {
-          OR: [
-            { name: { contains: search, mode: 'insensitive' } },
-            { description: { contains: search, mode: 'insensitive' } },
-            { nickname: { contains: search, mode: 'insensitive' } },
-          ],
-        }
-      : {};
+      const { studies, totalCount } = await studiesRepository.findAndCountAll({
+        where: whereClause,
+        orderBy: {
+          [sort]: order,
+        },
+        take: take,
+        skip: skip,
+      });
 
-    const { studies, totalCount } = await studiesRepository.findAndCountAll({
-      where: whereClause,
-      orderBy: {
-        [sortField]: sortOrder,
-      },
-      take: take,
-      skip: skip,
-    });
-
-    res.status(HTTP_STATUS.OK).json({
-      data: studies,
-      meta: {
-        page: pageNum,
-        limit: take,
-        totalCount: totalCount,
-      },
-    });
-  } catch (error) {
-    // console.error('스터디 조회중 에러 발생', error);
-    // res.status(500).json({ message: '서버 에러 발생' });
-    const serverError = new HttpException(
-      HTTP_STATUS.INTERNAL_SERVER_ERROR,
-      ERROR_MESSAGE.FAILED_TO_FETCH_STUDIES,
-      error.message,
-    );
-
-    next(serverError);
-  }
-});
-
+      res.status(HTTP_STATUS.OK).json({
+        data: studies,
+        meta: {
+          page: pageNum,
+          limit: take,
+          totalCount,
+        },
+      });
+    } catch (error) {
+      console.error('DB 에러 상세 내용:', error);
+      const serverError = new HttpException(
+        HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        ERROR_MESSAGE.FAILED_TO_FETCH_STUDIES,
+        error.message,
+      );
+      next(serverError);
+    }
+  },
+);
 
 // API 작성
 
 // --------- 1. POST /api/studies - 새 스터디 생성 -----------
 // 미들웨어와 스터디 스키마를 통해 req.body 코드 간소화
 
-studiesRouter.post(  
+studiesRouter.post(
   '/',
   validate('body', createStudySchema),
   async (req, res, next) => {
     try {
       const newStudy = await studiesRepository.createStudy(req.body);
-      
+
       res.status(HTTP_STATUS.CREATED).json(newStudy);
     } catch (error) {
       next(error);
@@ -223,7 +216,7 @@ studiesRouter.patch(
     try {
       const { id } = req.params;
       const updatedStudy = await studiesRepository.updateStudy(id, req.body);
-      
+
       res.status(HTTP_STATUS.OK).json(updatedStudy);
     } catch (error) {
       next(error);
@@ -242,9 +235,9 @@ studiesRouter.delete(
   async (req, res, next) => {
     try {
       const { id } = req.params;
-      
+
       await studiesRepository.deleteStudy(id);
-      
+
       res.sendStatus(HTTP_STATUS.NO_CONTENT);
     } catch (error) {
       next(error);

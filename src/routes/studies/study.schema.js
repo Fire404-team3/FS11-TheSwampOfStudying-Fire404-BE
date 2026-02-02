@@ -12,6 +12,13 @@ export const STUDY_BACKGROUNDS = [
   'imageTile',
   'imagePlant',
 ];
+export const findAllSchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().max(100).default(10),
+  sort: z.enum(['createdAt', 'points']).default('createdAt'),
+  order: z.enum(['asc', 'desc']).default('desc'),
+  search: z.string().optional(),
+});
 
 // POST 스터디 생성용 스키마
 export const createStudySchema = z.object({
