@@ -53,7 +53,7 @@
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^8.4.0",
     "@prisma/adapter-pg": "^7.2.0",
-    "@prisma/client": "^7.2.0",
+    "@prisma/client": "^7.3.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.3",
@@ -70,6 +70,6 @@
     "eslint": "^9.39.2",
     "nodemon": "^3.1.11",
     "prettier": "^3.8.0",
-    "prisma": "^7.2.0"
+    "prisma": "^7.3.0"
   }
 }
