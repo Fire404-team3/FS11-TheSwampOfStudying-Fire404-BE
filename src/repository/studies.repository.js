@@ -66,31 +66,51 @@ function findStudyWithHabits(id) {
   });
 }
 
-
+// 아래 주석처리 된 두가지 합쳤음
 function fetchAllResources(id) {
   return prisma.study.findUnique({
     where: { id: String(id) },
     include: {
+      // 1. 습관과 그에 딸린 기록들까지 모두 포함
       habits: {
-        include: { records: true },
+        include: { 
+          records: true 
+        },
       },
-      emojiLogs: true,
+      // 2. 이모지 로그를 카운트 순으로 정렬해서 포함
+      emojiLogs: {
+        orderBy: { 
+          count: 'desc' 
+        },
+      },
     },
   });
 }
 
-// 스터디 상세 조회 + Top3 이모지
-function findStudyWithTopEmojis(id) {
-  return prisma.study.findUnique({
-    where: { id },
-    include: {
-      emojiLogs: {
-        orderBy: { count: 'desc' },
-        take: 3,
-      },
-    },
-  });
-}
+// function fetchAllResources(id) {
+//   return prisma.study.findUnique({
+//     where: { id: String(id) },
+//     include: {
+//       habits: {
+//         include: { records: true },
+//       },
+//       emojiLogs: true,
+//     },
+//   });
+// }
+
+// // 스터디 상세 조회 + Top3 이모지
+// function findStudyWithTopEmojis(id) {
+//   return prisma.study.findUnique({
+//     where: { id },
+//     include: {
+//       emojiLogs: {
+//         orderBy: { count: 'desc' },
+//         take: 3,
+//       },
+//     },
+//   });
+// }
 
 // 해당 이모지 있으면 +1, 없으면 생성
 function upsertEmoji(studyId, emojiType) {
@@ -134,7 +154,7 @@ export const studiesRepository = {
   deleteStudy,
   findStudyWithHabits,
   fetchAllResources,
-  findStudyWithTopEmojis,
+  // findStudyWithTopEmojis,
   upsertEmoji,
   addPoints
 };

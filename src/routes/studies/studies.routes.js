@@ -1,7 +1,6 @@
 import express from 'express';
-import { habitRouter } from '../habits/index.js';
-import { studiesRepository } from '#repository';
-import { checkStudyOwner, validate } from '#middlewares';
+import { habitsRepository, studiesRepository } from '#repository';
+import { checkStudyOwner, validate, validateObject } from '#middlewares';
 import { NotFoundException } from '#exceptions';
 import {
   createStudySchema,
@@ -13,74 +12,105 @@ import {
 } from './study.schema.js';
 import { ERROR_MESSAGE, HTTP_STATUS } from '#constants';
 import { HttpException } from '#exceptions';
-//오늘의 습관
-// import { studyHabitsRouter } from './habits/study-habits.routes.js';
+import { habitsSchema } from '../habits/habits.schema.js';
+import { prisma } from '#db/prisma.js';
 
 export const studiesRouter = express.Router();
-studiesRouter.use('/:id/habits', studyHabitsRouter);
 
-// habits/resources
-//상세페이지
-// 포스트맨 검색 -> [ /studies/:id/ ]
-studiesRouter.get('/:id', async (req, res, next) => {
-  try {
-    const { id } = req.params;
-
-    if (!id) {
-      res
-        .status(HTTP_STATUS.BAD_REQUEST)
-        .json({ error: ERROR_MESSAGE.FAILED_TO_FETCH_STUDY });
-    }
-
-    const studyAllResources = await studiesRepository.fetchAllResources(id);
-    if (!studyAllResources) {
-      return res
-        .status(HTTP_STATUS.NOT_FOUND)
-        .json({ error: ERROR_MESSAGE.STUDY_NOT_FOUND });
-    }
-
-    res.status(HTTP_STATUS.OK).json({
-      success: true,
-      message: `${id}의 전체 정보 조회 성공`,
-      data: studyAllResources,
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-// GET /studies/:id - 스터디 상세 정보 + Top3 이모지
+// 상세페이지 전용 + 이모지 카운트 순 정렬 로직
+// GET /studies/:id - 스터디 상세 정보 (습관, 기록, 정렬된 이모지 포함)
 studiesRouter.get(
   '/:id',
-  validate('params', paramsIdSchema),
+  validate('params', paramsIdSchema), // 유효성 검사 미들웨어
   async (req, res, next) => {
     try {
       const { id } = req.params;
 
-      const study = await studiesRepository.findStudyWithTopEmojis(id);
+      // 통합된 레포지토리 메서드 호출 (habits, records, sorted emojiLogs 포함)
+      const study = await studiesRepository.fetchAllResources(id);
 
+      // 3. 존재 여부 확인 및 예외 처리
       if (!study) {
         throw new NotFoundException(ERROR_MESSAGE.STUDY_NOT_FOUND);
       }
 
-      // password 제거 & emojiLogs -> topRankedEmojis 변환
-      const { _password, emojiLogs, ...studyData } = study;
+      // password 제거 및 데이터 구조화 필요할 경우
+      // const { _password, ...studyData } = study;
 
+      // 데이터 가공 없이 전체 정보 반환 (비밀번호 포함)
       res.status(HTTP_STATUS.OK).json({
         success: true,
-        data: {
-          ...studyData,
-          topRankedEmojis: emojiLogs.map(({ emojiType, count }) => ({
-            emojiType,
-            count,
-          })),
-        },
+        message: `${id}번 스터디의 전체 정보 조회 성공`,
+        data: study,
       });
     } catch (error) {
       next(error);
     }
   },
 );
+
+// habits/resources
+//상세페이지
+// 포스트맨 검색 -> [ /studies/:id/ ]
+// studiesRouter.get('/:id', async (req, res, next) => {
+//   try {
+//     const { id } = req.params;
+
+//     if (!id) {
+//       res
+//         .status(HTTP_STATUS.BAD_REQUEST)
+//         .json({ error: ERROR_MESSAGE.FAILED_TO_FETCH_STUDY });
+//     }
+
+//     const studyAllResources = await studiesRepository.fetchAllResources(id);
+//     if (!studyAllResources) {
+//       return res
+//         .status(HTTP_STATUS.NOT_FOUND)
+//         .json({ error: ERROR_MESSAGE.STUDY_NOT_FOUND });
+//     }
+
+//     res.status(HTTP_STATUS.OK).json({
+//       success: true,
+//       message: `${id}의 전체 정보 조회 성공`,
+//       data: studyAllResources,
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// });
+
+// // GET /studies/:id - 스터디 상세 정보 + Top3 이모지
+// studiesRouter.get(
+//   '/:id',
+//   validate('params', paramsIdSchema),
+//   async (req, res, next) => {
+//     try {
+//       const { id } = req.params;
+
+//       const study = await studiesRepository.findStudyWithTopEmojis(id);
+
+//       if (!study) {
+//         throw new NotFoundException(ERROR_MESSAGE.STUDY_NOT_FOUND);
+//       }
+
+//       // password 제거 & emojiLogs -> topRankedEmojis 변환
+//       const { _password, emojiLogs, ...studyData } = study;
+
+//       res.status(HTTP_STATUS.OK).json({
+//         success: true,
+//         data: {
+//           ...studyData,
+//           topRankedEmojis: emojiLogs.map(({ emojiType, count }) => ({
+//             emojiType,
+//             count,
+//           })),
+//         },
+//       });
+//     } catch (error) {
+//       next(error);
+//     }
+//   },
+// );
 
 // POST /studies/:id/emojis - 응원 이모지 카운트 증가
 studiesRouter.post(
@@ -202,19 +232,18 @@ studiesRouter.get('/', async (req, res, next) => {
   }
 });
 
-
 // API 작성
 
 // --------- 1. POST /api/studies - 새 스터디 생성 -----------
 // 미들웨어와 스터디 스키마를 통해 req.body 코드 간소화
 
-studiesRouter.post(  
+studiesRouter.post(
   '/',
   validate('body', createStudySchema),
   async (req, res, next) => {
     try {
       const newStudy = await studiesRepository.createStudy(req.body);
-      
+
       res.status(HTTP_STATUS.CREATED).json(newStudy);
     } catch (error) {
       next(error);
@@ -254,7 +283,7 @@ studiesRouter.patch(
     try {
       const { id } = req.params;
       const updatedStudy = await studiesRepository.updateStudy(id, req.body);
-      
+
       res.status(HTTP_STATUS.OK).json(updatedStudy);
     } catch (error) {
       next(error);
@@ -273,9 +302,9 @@ studiesRouter.delete(
   async (req, res, next) => {
     try {
       const { id } = req.params;
-      
+
       await studiesRepository.deleteStudy(id);
-      
+
       res.sendStatus(HTTP_STATUS.NO_CONTENT);
     } catch (error) {
       next(error);
@@ -283,9 +312,8 @@ studiesRouter.delete(
   },
 );
 
-
-// 오늘의 습관 
-
+// 오늘의 습관
+// GET /studies/:id/habits
 studiesRouter.get('/:id/habits', async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -308,12 +336,62 @@ studiesRouter.get('/:id/habits', async (req, res, next) => {
       message: `${id}의 스터디 습관 목록 조회 성공`,
       data: habitList,
     });
-
   } catch (error) {
     next(error);
   }
 });
 
+// 특정 Study의 습관을 삭제/신규/수정을 동기화 처리하기 위한 로직
+// PUT /studies/:studyId
+studiesRouter.put(
+  '/:id/habits', //studyId
+  validateObject(habitsSchema.params, 'params'),
+  validateObject(habitsSchema.body, 'body'),
+  async (req, res, next) => {
+    try {
+      const { id: studyId } = req.params;
+      const habits = req.body;
 
-// 계층 연결
-studiesRouter.use('/:id/habits', habitRouter);
+      await prisma.$transaction(async (tx) => {
+        //기존 Habit중 현재 isDelted:False 전체습관 조회
+        const existingHabits = await habitsRepository.findActiveByStudyId(
+          tx,
+          studyId,
+        );
+
+        // 추가: 요청받은 데이터 중 유효한(숫자) Habit Id 목록 추출
+        const incomingIds = habits.map((h) => h.id).filter(Boolean);
+
+        // Delted 처리할 대상을 선별 - 새로 넘어오지 않은 Habits 추출(isDeleted : true처리 목적)
+        const habitsToDelete = existingHabits.filter(
+          (existingHabit) => !incomingIds.includes(existingHabit.id),
+        );
+
+        // 생성 처리 대상 구분 : id가 없는(null) 표시되어온 대상 : 신규입력 대상
+        const habitsToCreate = habits.filter((habit) => !habit.id);
+
+        //습관수정 대상 - FE로부터 아무 표시가 없는 대상 : name 수정 대상
+        const habitsToUpdate = habits.filter((habit) => habit.id);
+
+        // 🚀 여기에 로그를 찍어서 확인해보세요!
+        console.log('--- [PUT /studies/:id] 트랜잭션 데이터 확인 ---');
+        console.log('1. Study ID (Params):', studyId);
+        console.log('2. 삭제 대상 (Delete):', habitsToDelete.map(h => h.id));
+        console.log('3. 생성 대상 (Create):', habitsToCreate.map(h => h.name));
+        console.log('4. 수정 대상 (Update):', habitsToUpdate.map(h => h.id));
+        console.log('-------------------------------------------');
+
+        // 삭제/신규/수정 일괄 처리
+        await Promise.all([
+          habitsRepository.deleteHabits(tx, habitsToDelete),
+          habitsRepository.createHabits(tx, studyId, habitsToCreate),
+          habitsRepository.updateHabits(tx, habitsToUpdate),
+        ]);
+      });
+
+      res.sendStatus(HTTP_STATUS.NO_CONTENT);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
