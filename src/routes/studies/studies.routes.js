@@ -122,34 +122,19 @@ studiesRouter.get(
     try {
       const { page, limit, sort, order, search } = req.query;
 
-      const pageNum = Number(page);
-      const take = Number(limit);
-      const skip = (pageNum - 1) * take;
-
-      const whereClause = search
-        ? {
-            OR: [
-              { name: { contains: search, mode: 'insensitive' } },
-              { description: { contains: search, mode: 'insensitive' } },
-              { nickname: { contains: search, mode: 'insensitive' } },
-            ],
-          }
-        : {};
-
       const { studies, totalCount } = await studiesRepository.findAndCountAll({
-        where: whereClause,
-        orderBy: {
-          [sort]: order,
-        },
-        take: take,
-        skip: skip,
+        page,
+        limit,
+        sort,
+        order,
+        search,
       });
 
       res.status(HTTP_STATUS.OK).json({
         data: studies,
         meta: {
-          page: pageNum,
-          limit: take,
+          page: page,
+          limit: limit,
           totalCount,
         },
       });

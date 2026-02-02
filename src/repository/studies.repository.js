@@ -1,12 +1,26 @@
 import { prisma } from '#db/prisma.js';
 
-async function findAndCountAll({ where, orderBy, take, skip }) {
+async function findAndCountAll({ page, limit, sort, order, search }) {
+  const where = search
+    ? {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { description: { contains: search, mode: 'insensitive' } },
+          { nickname: { contains: search, mode: 'insensitive' } },
+        ],
+      }
+    : {};
+
+  const pageNum = Number(page);
+  const take = Number(limit);
+  const skip = (pageNum - 1) * take;
+
   const [studies, totalCount] = await Promise.all([
     prisma.study.findMany({
       where,
-      orderBy,
-      take,
-      skip,
+      orderBy: { [sort]: order },
+      take: take,
+      skip: skip,
       include: {
         emojiLogs: {
           orderBy: { count: 'desc' },
@@ -58,7 +72,7 @@ function findStudyWithHabits(id) {
       habits: {
         where: {
           isDeleted: false,
-        }
+        },
       },
     },
   });
@@ -133,5 +147,5 @@ export const studiesRepository = {
   fetchAllResources,
   findStudyWithTopEmojis,
   upsertEmoji,
-  addPoints
+  addPoints,
 };
