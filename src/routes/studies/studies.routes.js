@@ -1,27 +1,156 @@
 import express from 'express';
+import { prisma } from '#db/prisma.js';
 import { habitsRepository, studiesRepository } from '#repository';
+import { studiesSchema } from './study.schema.js';
+import { habitsSchema } from '../habits/habits.schema.js';
 import { checkStudyOwner, validate, validateObject } from '#middlewares';
 import { NotFoundException } from '#exceptions';
-import {
-  createStudySchema,
-  emojiSchema,
-  paramsIdSchema,
-  passwordCheckSchema,
-  pointsSchema,
-  updateStudySchema,
-} from './study.schema.js';
-import { ERROR_MESSAGE, HTTP_STATUS } from '#constants';
 import { HttpException } from '#exceptions';
-import { habitsSchema } from '../habits/habits.schema.js';
-import { prisma } from '#db/prisma.js';
+import { ERROR_MESSAGE, HTTP_STATUS } from '#constants';
 
 export const studiesRouter = express.Router();
+
+// GET /studies
+studiesRouter.get('/', async (req, res, next) => {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      sort = 'latest',
+      order = 'desc',
+      search,
+    } = req.query;
+
+    const pageNum = Math.max(parseInt(page, 10) || 1, 1);
+    const take = Math.max(parseInt(limit, 10) || 10, 1);
+    const skip = (pageNum - 1) * take;
+
+    const sortOrder = order.toLowerCase() === 'asc' ? 'asc' : 'desc';
+    const sortField = sort === 'points' ? 'points' : 'createdAt';
+
+    const whereClause = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' } },
+            { description: { contains: search, mode: 'insensitive' } },
+            { nickname: { contains: search, mode: 'insensitive' } },
+          ],
+        }
+      : {};
+
+    const { studies, totalCount } = await studiesRepository.findAndCountAll({
+      where: whereClause,
+      orderBy: {
+        [sortField]: sortOrder,
+      },
+      take: take,
+      skip: skip,
+    });
+
+    res.status(HTTP_STATUS.OK).json({
+      data: studies,
+      meta: {
+        page: pageNum,
+        limit: take,
+        totalCount: totalCount,
+      },
+    });
+  } catch (error) {
+    // console.error('스터디 조회중 에러 발생', error);
+    // res.status(500).json({ message: '서버 에러 발생' });
+    const serverError = new HttpException(
+      HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      ERROR_MESSAGE.FAILED_TO_FETCH_STUDIES,
+      error.message,
+    );
+
+    next(serverError);
+  }
+});
+
+// --------- 1. POST /api/studies - 새 스터디 생성 -----------
+// 미들웨어와 스터디 스키마를 통해 req.body 코드 간소화
+
+studiesRouter.post(
+  '/',
+  validate('body', studiesSchema.createStudySchema),
+  async (req, res, next) => {
+    try {
+      const newStudy = await studiesRepository.createStudy(req.body);
+
+      res.status(HTTP_STATUS.CREATED).json(newStudy);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+// --------- 2. POST /api/studies/:id/check-password - 비밀번호 검증 ------------
+// 3,4를 위한 권한 확인용, 모달(비밀번호 인증) 성공 시 3(수정), 4(삭제)를 할 수 있도록 사용
+// checkStudyOwner 미들웨어를 사용하여 중복코드 간소화
+
+studiesRouter.post(
+  '/:id/check-password',
+  validate('params', studiesSchema.paramsIdSchema),
+  validate('body', studiesSchema.passwordCheckSchema),
+  checkStudyOwner,
+  async (req, res, next) => {
+    try {
+      // checkStudyOwner를 통과하면(스터디 정보가 있고 비밀번호 일치) 200
+      res.sendStatus(HTTP_STATUS.OK);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+// --------- 3. PATCH /api/studies/:id - 특정 스터디 수정 -----------
+// { 비밀번호 }를 입력하여 (스터디 등록 시 입력했던 비밀번호와 일치할 경우), 스터디 정보 수정
+// checkStudyOwner 미들웨어를 사용하여 중복코드 간소화
+
+studiesRouter.patch(
+  '/:id',
+  validate('params', studiesSchema.paramsIdSchema),
+  validate('body', studiesSchema.updateStudySchema),
+  checkStudyOwner,
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const updatedStudy = await studiesRepository.updateStudy(id, req.body);
+
+      res.status(HTTP_STATUS.OK).json(updatedStudy);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+// 4. DELETE /api/studies/:id - 특정 스터디 삭제
+// checkStudyOwner 미들웨어를 사용하여 중복코드 간소화
+
+studiesRouter.delete(
+  '/:id',
+  validate('params', studiesSchema.paramsIdSchema),
+  validate('body', studiesSchema.passwordCheckSchema),
+  checkStudyOwner,
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+
+      await studiesRepository.deleteStudy(id);
+
+      res.sendStatus(HTTP_STATUS.NO_CONTENT);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
 // 상세페이지 전용 + 이모지 카운트 순 정렬 로직
 // GET /studies/:id - 스터디 상세 정보 (습관, 기록, 정렬된 이모지 포함)
 studiesRouter.get(
   '/:id',
-  validate('params', paramsIdSchema), // 유효성 검사 미들웨어
+  validate('params', studiesSchema.paramsIdSchema), // 유효성 검사 미들웨어
   async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -115,8 +244,8 @@ studiesRouter.get(
 // POST /studies/:id/emojis - 응원 이모지 카운트 증가
 studiesRouter.post(
   '/:id/emojis',
-  validate('params', paramsIdSchema),
-  validate('body', emojiSchema),
+  validate('params', studiesSchema.paramsIdSchema),
+  validate('body', studiesSchema.emojiSchema),
   async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -143,8 +272,8 @@ studiesRouter.post(
 // POST /studies/:id/points - 공부 시간 비례 포인트 적립
 studiesRouter.post(
   '/:id/points',
-  validate('params', paramsIdSchema),
-  validate('body', pointsSchema),
+  validate('params', studiesSchema.paramsIdSchema),
+  validate('body', studiesSchema.pointsSchema),
   async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -169,143 +298,6 @@ studiesRouter.post(
           totalPoints: updatedStudy.points,
         },
       });
-    } catch (error) {
-      next(error);
-    }
-  },
-);
-
-studiesRouter.get('/', async (req, res, next) => {
-  try {
-    const {
-      page = 1,
-      limit = 10,
-      sort = 'latest',
-      order = 'desc',
-      search,
-    } = req.query;
-
-    const pageNum = Math.max(parseInt(page, 10) || 1, 1);
-    const take = Math.max(parseInt(limit, 10) || 10, 1);
-    const skip = (pageNum - 1) * take;
-
-    const sortOrder = order.toLowerCase() === 'asc' ? 'asc' : 'desc';
-    const sortField = sort === 'points' ? 'points' : 'createdAt';
-
-    const whereClause = search
-      ? {
-          OR: [
-            { name: { contains: search, mode: 'insensitive' } },
-            { description: { contains: search, mode: 'insensitive' } },
-            { nickname: { contains: search, mode: 'insensitive' } },
-          ],
-        }
-      : {};
-
-    const { studies, totalCount } = await studiesRepository.findAndCountAll({
-      where: whereClause,
-      orderBy: {
-        [sortField]: sortOrder,
-      },
-      take: take,
-      skip: skip,
-    });
-
-    res.status(HTTP_STATUS.OK).json({
-      data: studies,
-      meta: {
-        page: pageNum,
-        limit: take,
-        totalCount: totalCount,
-      },
-    });
-  } catch (error) {
-    // console.error('스터디 조회중 에러 발생', error);
-    // res.status(500).json({ message: '서버 에러 발생' });
-    const serverError = new HttpException(
-      HTTP_STATUS.INTERNAL_SERVER_ERROR,
-      ERROR_MESSAGE.FAILED_TO_FETCH_STUDIES,
-      error.message,
-    );
-
-    next(serverError);
-  }
-});
-
-// API 작성
-
-// --------- 1. POST /api/studies - 새 스터디 생성 -----------
-// 미들웨어와 스터디 스키마를 통해 req.body 코드 간소화
-
-studiesRouter.post(
-  '/',
-  validate('body', createStudySchema),
-  async (req, res, next) => {
-    try {
-      const newStudy = await studiesRepository.createStudy(req.body);
-
-      res.status(HTTP_STATUS.CREATED).json(newStudy);
-    } catch (error) {
-      next(error);
-    }
-  },
-);
-
-// --------- 2. POST /api/studies/:id/check-password - 비밀번호 검증 ------------
-// 3,4를 위한 권한 확인용, 모달(비밀번호 인증) 성공 시 3(수정), 4(삭제)를 할 수 있도록 사용
-// checkStudyOwner 미들웨어를 사용하여 중복코드 간소화
-
-studiesRouter.post(
-  '/:id/check-password',
-  validate('params', paramsIdSchema),
-  validate('body', passwordCheckSchema),
-  checkStudyOwner,
-  async (req, res, next) => {
-    try {
-      // checkStudyOwner를 통과하면(스터디 정보가 있고 비밀번호 일치) 200
-      res.sendStatus(HTTP_STATUS.OK);
-    } catch (error) {
-      next(error);
-    }
-  },
-);
-
-// --------- 3. PATCH /api/studies/:id - 특정 스터디 수정 -----------
-// { 비밀번호 }를 입력하여 (스터디 등록 시 입력했던 비밀번호와 일치할 경우), 스터디 정보 수정
-// checkStudyOwner 미들웨어를 사용하여 중복코드 간소화
-
-studiesRouter.patch(
-  '/:id',
-  validate('params', paramsIdSchema),
-  validate('body', updateStudySchema),
-  checkStudyOwner,
-  async (req, res, next) => {
-    try {
-      const { id } = req.params;
-      const updatedStudy = await studiesRepository.updateStudy(id, req.body);
-
-      res.status(HTTP_STATUS.OK).json(updatedStudy);
-    } catch (error) {
-      next(error);
-    }
-  },
-);
-
-// 4. DELETE /api/studies/:id - 특정 스터디 삭제
-// checkStudyOwner 미들웨어를 사용하여 중복코드 간소화
-
-studiesRouter.delete(
-  '/:id',
-  validate('params', paramsIdSchema),
-  validate('body', passwordCheckSchema),
-  checkStudyOwner,
-  async (req, res, next) => {
-    try {
-      const { id } = req.params;
-
-      await studiesRepository.deleteStudy(id);
-
-      res.sendStatus(HTTP_STATUS.NO_CONTENT);
     } catch (error) {
       next(error);
     }
@@ -376,9 +368,18 @@ studiesRouter.put(
         // 🚀 여기에 로그를 찍어서 확인해보세요!
         console.log('--- [PUT /studies/:id] 트랜잭션 데이터 확인 ---');
         console.log('1. Study ID (Params):', studyId);
-        console.log('2. 삭제 대상 (Delete):', habitsToDelete.map(h => h.id));
-        console.log('3. 생성 대상 (Create):', habitsToCreate.map(h => h.name));
-        console.log('4. 수정 대상 (Update):', habitsToUpdate.map(h => h.id));
+        console.log(
+          '2. 삭제 대상 (Delete):',
+          habitsToDelete.map((h) => h.id),
+        );
+        console.log(
+          '3. 생성 대상 (Create):',
+          habitsToCreate.map((h) => h.name),
+        );
+        console.log(
+          '4. 수정 대상 (Update):',
+          habitsToUpdate.map((h) => h.id),
+        );
         console.log('-------------------------------------------');
 
         // 삭제/신규/수정 일괄 처리
