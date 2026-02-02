@@ -83,5 +83,5 @@ export const pointsSchema = z.object({
   minutes: z
     .number({ required_error: ERROR_MESSAGE.MINUTES_REQUIRED })
     .int({ message: ERROR_MESSAGE.MINUTES_INTEGER })
-    .min(30, { message: ERROR_MESSAGE.MINUTES_MIN_VALUE }),
+    .min(10, { message: ERROR_MESSAGE.MINUTES_MIN_VALUE }), // 최소 집중시간: 10분
 });

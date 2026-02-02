@@ -61,7 +61,7 @@ export const ERROR_MESSAGE = {
   // Points 관련
   MINUTES_REQUIRED: '집중 시간을 설정해 주세요.',
   MINUTES_INTEGER: '집중 시간은 분 단위로 설정해 주세요.',
-  MINUTES_MIN_VALUE: '집중하는 시간은 최소 30분 이상이어야 합니다.',
+  MINUTES_MIN_VALUE: '집중하는 시간은 최소 10분 이상이어야 합니다.',
 
   // Emoji 관련
   EMOJI_TYPE_REQUIRED: '이모지를 생성해 주세요.',
