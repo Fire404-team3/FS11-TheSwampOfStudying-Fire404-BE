@@ -1,13 +1,17 @@
 import express from 'express';
-import { router } from './routes/index.js';
 import { config } from '#config';
 import { prisma } from '#db/prisma.js';
+import { getSwaggerDoc, swaggerUiServe, swaggerUiSetup } from './swagger.js';
 import { cors, errorHandler } from '#middlewares';
+import { router } from './routes/index.js';
 
 const app = express();
 app.use(express.json());
 
 app.use(cors);
+
+// swagger
+app.use('/api-docs', swaggerUiServe, swaggerUiSetup(getSwaggerDoc()));
 
 app.use('/', router);
 
