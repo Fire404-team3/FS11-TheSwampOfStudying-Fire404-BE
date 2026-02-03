@@ -85,3 +85,12 @@ export const pointsSchema = z.object({
     .int({ message: ERROR_MESSAGE.MINUTES_INTEGER })
     .min(30, { message: ERROR_MESSAGE.MINUTES_MIN_VALUE }),
 });
+
+export const studiesSchema = {
+  createStudySchema,
+  emojiSchema,
+  paramsIdSchema,
+  passwordCheckSchema,
+  pointsSchema,
+  updateStudySchema,
+};

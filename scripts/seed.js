@@ -20,6 +20,33 @@ const habitNames = [
   '스쿼트 30회',
 ];
 
+const emojiPool = [
+  '🔥',
+  '👍',
+  '🙌',
+  '🎉',
+  '💪',
+  '✨',
+  '🚀',
+  '💯',
+  '🤩',
+  '👏',
+  '💖',
+  '💡',
+  '✅',
+  '⭐',
+  '🎈',
+  '🏆',
+  '🍀',
+  '🎯',
+  '🌈',
+  '⚡',
+  '🥳',
+  '😎',
+  '🌻',
+  '🤝',
+];
+
 const makeStudyInput = () => ({
   nickname: faker.person.lastName() + faker.person.firstName(),
   name: faker.word.adjective(),
@@ -68,33 +95,6 @@ const makeHabitInputForStudy = (studyId, count) => {
 };
 
 const makeEmojiLogInput = () => {
-  const emojiPool = [
-    '🔥',
-    '👍',
-    '🙌',
-    '🎉',
-    '💪',
-    '✨',
-    '🚀',
-    '💯',
-    '🤩',
-    '👏',
-    '💖',
-    '💡',
-    '✅',
-    '⭐',
-    '🎈',
-    '🏆',
-    '🍀',
-    '🎯',
-    '🌈',
-    '⚡',
-    '🥳',
-    '😎',
-    '🌻',
-    '🤝',
-  ];
-
   // 각 스터디마다 8~12개의 이모지를 랜덤하게 선택 (중복 없음)
   const selectedEmojis = faker.helpers.arrayElements(emojiPool, {
     min: 8,
@@ -116,26 +116,32 @@ const resetDb = (prisma) =>
   ]);
 
 const seedStudies = async (prisma, count) => {
-  for (const _ of xs(count)) {
-    // 1. 스터디를 생성하면서 해당 스터디에 종속된 EmojiLog들을 한 번에 생성
+  const promises = xs(count).map(async () => {
+    // 스터디 생성 (EmojiLog 포함)
     const study = await prisma.study.create({
       data: {
         ...makeStudyInput(),
         emojiLogs: {
-          create: makeEmojiLogInput(), // 여기서 생성된 이모지들은 이 study.id에 종속됨
+          create: makeEmojiLogInput(),
         },
       },
     });
 
-    // 2. 해당 스터디에 종속된 습관들 생성 (HabitRecord 포함)
+    // 해당 스터디의 습관들 생성 (HabitRecord 포함)
     const habitCount = faker.number.int({ min: 0, max: 6 });
     const habits = makeHabitInputForStudy(study.id, habitCount);
-    for (const habitData of habits) {
-      await prisma.habit.create({
-        data: habitData,
-      });
-    }
-  }
+
+    // 습관들도 병렬로 생성
+    return Promise.all(
+      habits.map((habitData) =>
+        prisma.habit.create({
+          data: habitData,
+        }),
+      ),
+    );
+  });
+
+  await Promise.all(promises);
 };
 
 async function main(prisma) {
