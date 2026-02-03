@@ -39,7 +39,7 @@ habitsRouter.post('/:id/check', async (req, res, next) => {
 habitsRouter.delete('/:id/check', async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { checkDate } = req.query;
+    const { checkDate } = req.body;
 
     if (!id) {
       return res
