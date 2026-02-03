@@ -8,15 +8,7 @@ export const validateObject = (schema, target = 'body') => { // target 추가 (�
       const validatedData = await schema.parseAsync(req[target]);
       req[target] = validatedData;
       next();
-    } catch (error) {
-      if (error instanceof z.ZodError) {   
-        const firstIssue = error.issues?.[0];
-        const errorMessage = firstIssue?.message || ERROR_MESSAGE.VALIDATION_FAILED;
-        return res.status(HTTP_STATUS.BAD_REQUEST).json({
-          success: false,
-          message: errorMessage,
-        });
-      }
+    } catch (error) {   // PR반영은 error-Handler에 위임
       next(error);
     }
   };
