@@ -39,7 +39,7 @@ export const ERROR_MESSAGE = {
   INVALID_ID_FORMAT: '유효하지 않은 아이디 형식입니다.',
 
   // Habit 관련
-  HABIT_NOT_FOUND: 'Habit not found',
+  HABIT_NOT_FOUND: '습관을 찾을 수 없습니다',
   HABIT_NAME_REQUIRED: 'Habit name is required',
   FAILED_TO_FETCH_HABITS: 'Failed to fetch habits',
   FAILED_TO_FETCH_HABIT: 'Failed to fetch habit',
