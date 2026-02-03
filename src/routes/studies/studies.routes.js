@@ -1,11 +1,10 @@
 import express from 'express';
 import { prisma } from '#db/prisma.js';
 import { habitsRepository, studiesRepository } from '#repository';
-import { findAllSchema, studiesSchema } from './study.schema.js';
-import { habitsSchema } from '../habits/habits.schema.js';
+import { studiesSchema } from './study.schema.js';
+// import { habitsSchema } from '../habits/habits.schema.js';
 import { checkStudyOwner, validate, validateObject } from '#middlewares';
 import { NotFoundException } from '#exceptions';
-import { HttpException } from '#exceptions';
 import { ERROR_MESSAGE, HTTP_STATUS } from '#constants';
 import { endOfDay, startOfWeek } from 'date-fns';
 
@@ -14,7 +13,7 @@ export const studiesRouter = express.Router();
 // GET /studies
 studiesRouter.get(
   '/',
-  validate('query', findAllSchema),
+  validate('query', studiesSchema.findAllSchema),
   async (req, res, next) => {
     try {
       const { page, limit, sort, order, search } = req.query;
@@ -318,8 +317,8 @@ studiesRouter.get('/:id/habits', async (req, res, next) => {
 // PUT /studies/:studyId
 studiesRouter.put(
   '/:id/habits', //studyId
-  validateObject(habitsSchema.params, 'params'),
-  validateObject(habitsSchema.body, 'body'),
+  validateObject(studiesSchema.habitsSchema.params, 'params'),
+  validateObject(studiesSchema.habitsSchema.body, 'body'),
   async (req, res, next) => {
     try {
       const { id: studyId } = req.params;
