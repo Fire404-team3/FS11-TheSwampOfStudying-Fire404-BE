@@ -29,7 +29,7 @@ model Habit {
     studyId String
     name    String // 습관 이름
 
-    study     Study         @relation(fields: [studyId], references: [id])
+    study     Study         @relation(fields: [studyId], references: [id], onDelete: Cascade)
     records   HabitRecord[]
     createdAt DateTime      @default(now()) //오늘부터 새로운 습관이 추가되어야 함
     isDeleted Boolean       @default(false) //종료시 이전기록에는 영향이 없어야 함
