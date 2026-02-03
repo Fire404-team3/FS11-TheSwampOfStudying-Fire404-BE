@@ -14,4 +14,4 @@ router.get('/', (req, res) => {
 
 // 라우터 연결
 router.use('/studies', studyRouter);
-router.use('/habits', habitRouter); // 추후 계층 구조 연결 후 삭제
+router.use('/habits', habitRouter);
