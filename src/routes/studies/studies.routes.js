@@ -2,7 +2,7 @@ import express from 'express';
 import { habitRouter } from '../habits/index.js';
 import { emojiRouter } from '../emojis/index.js';
 import { studiesRepository } from '#repository';
-import { HTTP_STATUS } from '#constants';
+import { ERROR_MESSAGE, HTTP_STATUS } from '#constants';
 import { checkStudyOwner, validate } from '#middlewares';
 import {
   createStudySchema,
@@ -38,7 +38,7 @@ studiesRouter.get(
       if (!study) {
         return res
           .status(HTTP_STATUS.NOT_FOUND)
-          .json({ message: '스터디를 찾을 수 없습니다.' });
+          .json(ERROR_MESSAGE.STUDY_NOT_FOUND);
       }
 
       res.status(HTTP_STATUS.OK).json(study);
