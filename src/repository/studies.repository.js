@@ -120,7 +120,7 @@ function upsertEmoji(studyId, emojiType) {
       emojiType: true,
       count: true,
     },
-    
+
     update: {
       count: {
         increment: 1,

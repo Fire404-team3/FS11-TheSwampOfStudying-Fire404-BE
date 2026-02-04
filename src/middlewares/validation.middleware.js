@@ -16,7 +16,7 @@ export const validate = (target, schema) => {
     throw new Error(
       `[validate middleware] Invalid target: "${target}". Expected "body", "query", or "params".`,
     );
-  };
+  }
 
   return (req, res, next) => {
     try {
