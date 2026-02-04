@@ -94,7 +94,7 @@ export const pointsSchema = z.object({
 });
 
 // 1. [내부용] 단일 습관 스키마
-const habitSchema = z.object({
+const habitModalSchema = z.object({
   id: z.string().nullable().optional(), // 리펙토링 -신규 시 'new-' 형태 제거
   // [은결] : id 데이터 타입 number -> string으로 수정
   name: z
@@ -105,7 +105,7 @@ const habitSchema = z.object({
 });
 
 // 2. [Export] 전체 습관 관련 스키마 모음
-const habitsSchema = {
+const habitsModalSchema = {
   // Body 검증용: 습관 배열
   body: z.array(habitSchema),
 
@@ -125,5 +125,5 @@ export const studiesSchema = {
   passwordCheckSchema,
   pointsSchema,
   updateStudySchema,
-  habitsSchema,
+  habitsModalSchema,
 };

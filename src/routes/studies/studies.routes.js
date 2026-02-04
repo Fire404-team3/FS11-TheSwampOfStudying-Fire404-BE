@@ -317,8 +317,8 @@ studiesRouter.get('/:id/habits', async (req, res, next) => {
 // PUT /studies/:studyId
 studiesRouter.put(
   '/:id/habits', //studyId
-  validateObject(studiesSchema.habitsSchema.params, 'params'),
-  validateObject(studiesSchema.habitsSchema.body, 'body'),
+  validateObject(studiesSchema.habitsModalSchema.params, 'params'),
+  validateObject(studiesSchema.habitsModalSchema.body, 'body'),
   async (req, res, next) => {
     try {
       const { id: studyId } = req.params;
