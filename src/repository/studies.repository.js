@@ -164,11 +164,19 @@ function upsertEmoji(studyId, emojiType) {
         emojiType,
       },
     },
+
+    select: {
+      studyId: true,
+      emojiType: true,
+      count: true,
+    },
+    
     update: {
       count: {
         increment: 1,
       },
     },
+
     create: {
       studyId,
       emojiType,
