@@ -39,7 +39,7 @@ export const ERROR_MESSAGE = {
   INVALID_ID_FORMAT: '유효하지 않은 아이디 형식입니다.',
 
   // Habit 관련
-  HABIT_NOT_FOUND: 'Habit not found',
+  HABIT_NOT_FOUND: '습관을 찾을 수 없습니다',
   HABIT_NAME_REQUIRED: 'Habit name is required',
   FAILED_TO_FETCH_HABITS: 'Failed to fetch habits',
   FAILED_TO_FETCH_HABIT: 'Failed to fetch habit',
@@ -51,8 +51,8 @@ export const ERROR_MESSAGE = {
 
   // HabitRecord 관련
   HABIT_ID_REQUIRED: 'Habit id is required',
-  CHECK_DATE_REQUIRED: 'Check Date is Required',
-  FAILED_TO_FETCH_HABIT_RECORDS: 'Failed to fetch habit records',
+  CHECK_DATE_REQUIRED: '습관 날짜는 필수 입니다.',
+  FAILED_TO_FETCH_HABIT_RECORDS: '습관기록들을 가져오는데 실패했습니다.',
   FAILED_TO_FETCH_HABIT_RECORD: 'Failed to fetch habit record',
   FAILED_TO_CREATE_HABIT_RECORD: 'Failed to create habit record',
   FAILED_TO_UPDATE_HABIT_RECORD: 'Failed to update habit record',
