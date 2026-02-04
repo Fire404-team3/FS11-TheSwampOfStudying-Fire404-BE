@@ -265,7 +265,7 @@ studiesRouter.post(
         throw new NotFoundException(ERROR_MESSAGE.STUDY_NOT_FOUND);
       }
 
-      // 포인트 계산: 기본 3p + 10분당 1p
+      // 포인트 계산: 성공 3p + 10분당 1p (최소 집중시간 10분)
       const earnedPoints = 3 + Math.floor(minutes / 10);
 
       const updatedStudy = await studiesRepository.addPoints(id, earnedPoints);
