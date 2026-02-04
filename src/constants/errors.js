@@ -8,7 +8,6 @@ export const PRISMA_ERROR = {
 export const ERROR_MESSAGE = {
   // Study 관련
   STUDY_NOT_FOUND: '스터디를 찾을 수 없습니다.',
-  REQUIRED_INFORMATION: 'Please enter required information',
   FAILED_TO_FETCH_STUDIES: 'Failed to fetch studies',
   FAILED_TO_FETCH_STUDY: 'Failed to fetch study',
   FAILED_TO_CREATE_STUDY: 'Failed to create study',
@@ -39,20 +38,23 @@ export const ERROR_MESSAGE = {
   INVALID_ID_FORMAT: '유효하지 않은 아이디 형식입니다.',
 
   // Habit 관련
-  HABIT_NOT_FOUND: '습관을 찾을 수 없습니다',
-  HABIT_NAME_REQUIRED: 'Habit name is required',
+  HABIT_NOT_FOUND: '습관을 찾을 수 없습니다.',
+  HABIT_NAME_REQUIRED: '습관 이름은 필수입니다.',
+
+  HABIT_MIN_LENGTH: '습관 등록은 2자리 이상이어야 합니다.',
+  HABIT_MAX_LENGTH: '습관 등록은 20자리 이내이어야 합니다.',
+
   FAILED_TO_FETCH_HABITS: 'Failed to fetch habits',
   FAILED_TO_FETCH_HABIT: 'Failed to fetch habit',
   FAILED_TO_CREATE_HABIT: 'Failed to create habit',
   FAILED_TO_UPDATE_HABIT: 'Failed to update habit',
   FAILED_TO_DELETE_HABIT: 'Failed to delete habit',
-  HABIT_MIN_LENGTH: '습관 등록은 2자리 이상이어야 합니다.',
-  HABIT_MAX_LENGTH: '습관 등록은 20자리 이내이어야 합니다.',
 
   // HabitRecord 관련
-  HABIT_ID_REQUIRED: 'Habit id is required',
+  HABIT_ID_REQUIRED: '습관 ID는 필수입니다.',
   CHECK_DATE_REQUIRED: '습관 날짜는 필수 입니다.',
   FAILED_TO_FETCH_HABIT_RECORDS: '습관기록들을 가져오는데 실패했습니다.',
+  
   FAILED_TO_FETCH_HABIT_RECORD: 'Failed to fetch habit record',
   FAILED_TO_CREATE_HABIT_RECORD: 'Failed to create habit record',
   FAILED_TO_UPDATE_HABIT_RECORD: 'Failed to update habit record',
@@ -80,11 +82,4 @@ export const ERROR_MESSAGE = {
   // Validation
   INVALID_INPUT: '유효하지 않은 입력입니다.',
   VALIDATION_FAILED: '유효성 검사에 실패했습니다.',
-
-  // Auth 관련 추후 key 값 추가
-  NO_AUTH_TOKEN: '',
-  INVALID_TOKEN: '',
-  STUDY_NOT_FOUND_FROM_TOKEN: '',
-  AUTH_FAILED: '',
-  INVALID_CREDENTIALS: '',
 };

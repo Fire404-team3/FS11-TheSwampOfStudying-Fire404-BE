@@ -10,7 +10,7 @@ const findActiveByStudyId = (tx, studyId) => {
   });
 };
 
-// 습관 단독 삭제 시, 과거 기록 보존을 위한 논리 삭제(Soft Delete) 처리 
+// 습관 단독 삭제 시, 과거 기록 보존을 위한 논리 삭제(Soft Delete) 처리
 // PR 반영 : update -> updateMany
 const deleteHabits = (tx, habits) => {
   const ids = habits.map((h) => h.id);
@@ -86,6 +86,12 @@ async function deleteHabitCheckDate(habitId, checkDate) {
   });
 }
 
+function findHabitById(id) {
+  return prisma.habit.findUnique({
+    where: { id: id },
+  });
+}
+
 export const habitsRepository = {
   findActiveByStudyId,
   deleteHabits,
@@ -93,4 +99,5 @@ export const habitsRepository = {
   updateHabits,
   toggleHabitCheckDate,
   deleteHabitCheckDate,
+  findHabitById,
 };

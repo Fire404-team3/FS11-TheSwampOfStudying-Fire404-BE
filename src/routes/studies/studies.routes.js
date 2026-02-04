@@ -2,7 +2,6 @@ import express from 'express';
 import { prisma } from '#db/prisma.js';
 import { habitsRepository, studiesRepository } from '#repository';
 import { studiesSchema } from './study.schema.js';
-// import { habitsSchema } from '../habits/habits.schema.js';
 import { checkStudyOwner, validate, validateObject } from '#middlewares';
 import { NotFoundException } from '#exceptions';
 import { ERROR_MESSAGE, HTTP_STATUS } from '#constants';
@@ -157,69 +156,6 @@ studiesRouter.get(
   },
 );
 
-// habits/resources
-//상세페이지
-// 포스트맨 검색 -> [ /studies/:id/ ]
-// studiesRouter.get('/:id', async (req, res, next) => {
-//   try {
-//     const { id } = req.params;
-
-//     if (!id) {
-//       res
-//         .status(HTTP_STATUS.BAD_REQUEST)
-//         .json({ error: ERROR_MESSAGE.FAILED_TO_FETCH_STUDY });
-//     }
-
-//     const studyAllResources = await studiesRepository.fetchAllResources(id);
-//     if (!studyAllResources) {
-//       return res
-//         .status(HTTP_STATUS.NOT_FOUND)
-//         .json({ error: ERROR_MESSAGE.STUDY_NOT_FOUND });
-//     }
-
-//     res.status(HTTP_STATUS.OK).json({
-//       success: true,
-//       message: `${id}의 전체 정보 조회 성공`,
-//       data: studyAllResources,
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// });
-
-// // GET /studies/:id - 스터디 상세 정보 + Top3 이모지
-// studiesRouter.get(
-//   '/:id',
-//   validate('params', paramsIdSchema),
-//   async (req, res, next) => {
-//     try {
-//       const { id } = req.params;
-
-//       const study = await studiesRepository.findStudyWithTopEmojis(id);
-
-//       if (!study) {
-//         throw new NotFoundException(ERROR_MESSAGE.STUDY_NOT_FOUND);
-//       }
-
-//       // password 제거 & emojiLogs -> topRankedEmojis 변환
-//       const { _password, emojiLogs, ...studyData } = study;
-
-//       res.status(HTTP_STATUS.OK).json({
-//         success: true,
-//         data: {
-//           ...studyData,
-//           topRankedEmojis: emojiLogs.map(({ emojiType, count }) => ({
-//             emojiType,
-//             count,
-//           })),
-//         },
-//       });
-//     } catch (error) {
-//       next(error);
-//     }
-//   },
-// );
-
 // POST /studies/:id/emojis - 응원 이모지 카운트 증가
 studiesRouter.post(
   '/:id/emojis',
@@ -266,16 +202,16 @@ studiesRouter.patch(
 
       const emoji = await studiesRepository.findEmojibyStudyId(id, emojiType);
 
-       if (!emoji) {
+      if (!emoji) {
         throw new NotFoundException(ERROR_MESSAGE.EMOJI_NOT_FOUND);
       }
       if (emoji.count <= 1) {
         await studiesRepository.deleteEmoji(id, emojiType);
 
         return res.status(HTTP_STATUS.OK).json({
-        success: true,
-        message:`${emojiType}이(가) 제거됨`
-      });
+          success: true,
+          message: `${emojiType}이(가) 제거됨`,
+        });
       }
 
       const updatedEmoji = await studiesRepository.decreaseEmoji(id, emojiType);
@@ -308,7 +244,8 @@ studiesRouter.post(
 
       // 포인트 계산: 성공 시 기본 3p + 10분당 1p, 실패 시 10분당 1p만
       const SUCCESS_POINTS = 3;
-      const earnedPoints = (isSuccess ? SUCCESS_POINTS : 0) + Math.floor(minutes / 10);
+      const earnedPoints =
+        (isSuccess ? SUCCESS_POINTS : 0) + Math.floor(minutes / 10);
 
       const updatedStudy = await studiesRepository.addPoints(id, earnedPoints);
 
@@ -380,23 +317,6 @@ studiesRouter.put(
 
         //습관수정 대상 - FE로부터 아무 표시가 없는 대상 : name 수정 대상
         const habitsToUpdate = habits.filter((habit) => habit.id);
-
-        // 🚀 여기에 로그를 찍어서 확인해보세요!
-        console.log('--- [PUT /studies/:id] 트랜잭션 데이터 확인 ---');
-        console.log('1. Study ID (Params):', studyId);
-        console.log(
-          '2. 삭제 대상 (Delete):',
-          habitsToDelete.map((h) => h.id),
-        );
-        console.log(
-          '3. 생성 대상 (Create):',
-          habitsToCreate.map((h) => h.name),
-        );
-        console.log(
-          '4. 수정 대상 (Update):',
-          habitsToUpdate.map((h) => h.id),
-        );
-        console.log('-------------------------------------------');
 
         // 삭제/신규/수정 일괄 처리
         await Promise.all([
