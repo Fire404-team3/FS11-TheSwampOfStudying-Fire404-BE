@@ -107,7 +107,7 @@ const habitModalSchema = z.object({
 // 2. [Export] 전체 습관 관련 스키마 모음
 const habitsModalSchema = {
   // Body 검증용: 습관 배열
-  body: z.array(habitSchema),
+  body: z.array(habitModalSchema),
 
   // Params 검증용: URL의 :id 검증
   params: z.object({
