@@ -24,12 +24,6 @@ habitsRouter.post(
         checkDate,
       );
 
-      if (!newHabitCheckDate) {
-        throw new NotFoundException(
-          ERROR_MESSAGE.FAILED_TO_FETCH_HABIT_RECORDS,
-        );
-      }
-
       res
         .status(HTTP_STATUS.CREATED)
         .json({ success: true, data: newHabitCheckDate });
