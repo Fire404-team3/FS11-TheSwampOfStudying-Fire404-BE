@@ -256,7 +256,7 @@ studiesRouter.post(
   async (req, res, next) => {
     try {
       const { id } = req.params;
-      const { minutes } = req.body;
+      const { minutes, isSuccess } = req.body;
 
       const study = await studiesRepository.findStudyById(id);
 
@@ -264,18 +264,16 @@ studiesRouter.post(
         throw new NotFoundException(ERROR_MESSAGE.STUDY_NOT_FOUND);
       }
 
-      // 포인트 계산: 성공 3p + 10분당 1p (최소 집중시간 10분)
-      const earnedPoints = 3 + Math.floor(minutes / 10);
+      // 포인트 계산: 성공 시 기본 3p + 10분당 1p, 실패 시 10분당 1p만
+      const SUCCESS_POINTS = 3;
+      const earnedPoints = (isSuccess ? SUCCESS_POINTS : 0) + Math.floor(minutes / 10);
 
       const updatedStudy = await studiesRepository.addPoints(id, earnedPoints);
 
       res.status(HTTP_STATUS.OK).json({
-        success: true,
-        data: {
-          studyId: updatedStudy.id,
-          earnedPoints,
-          totalPoints: updatedStudy.points,
-        },
+        studyId: updatedStudy.id,
+        earnedPoints,
+        totalPoints: updatedStudy.points,
       });
     } catch (error) {
       next(error);

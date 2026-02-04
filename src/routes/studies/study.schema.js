@@ -90,7 +90,8 @@ export const pointsSchema = z.object({
   minutes: z
     .number({ required_error: ERROR_MESSAGE.MINUTES_REQUIRED })
     .int({ message: ERROR_MESSAGE.MINUTES_INTEGER })
-    .min(10, { message: ERROR_MESSAGE.MINUTES_MIN_VALUE }), // 최소 집중시간: 10분
+    .min(10, { message: ERROR_MESSAGE.MINUTES_MIN_VALUE }),
+  isSuccess: z.boolean({ required_error: '성공 여부는 필수입니다.' }),
 });
 
 // 1. [내부용] 단일 습관 스키마
