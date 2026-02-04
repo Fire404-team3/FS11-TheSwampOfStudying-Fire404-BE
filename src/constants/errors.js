@@ -51,7 +51,7 @@ export const ERROR_MESSAGE = {
 
   // HabitRecord 관련
   HABIT_ID_REQUIRED: 'Habit id is required',
-  CHECK_DATE_REQUIRED: 'Check Date is Required',
+  CHECK_DATE_REQUIRED: '습관 날짜는 필수 입니다.',
   FAILED_TO_FETCH_HABIT_RECORDS: '습관기록들을 가져오는데 실패했습니다.',
   FAILED_TO_FETCH_HABIT_RECORD: 'Failed to fetch habit record',
   FAILED_TO_CREATE_HABIT_RECORD: 'Failed to create habit record',

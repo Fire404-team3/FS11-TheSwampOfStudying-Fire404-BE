@@ -9,7 +9,7 @@ export const paramsIdSchema = z.object({
 //post habits/:id/check => checkDate 확인용
 export const checkDateSchema = {
   body: z.object({
-    checkDate: z.coerce.date({ message: ERROR_MESSAGE.FAILED_TO_FETCH_HABIT_RECORDS})
+    checkDate: z.coerce.date({ message: ERROR_MESSAGE.CHECK_DATE_REQUIRED})
   })
 }
 
