@@ -248,6 +248,7 @@ studiesRouter.post(
   },
 );
 
+// PATCH /studies/:id/emojis - 응원 이모지 카운트 감소
 studiesRouter.patch(
   '/:id/emojis',
   validate('params', studiesSchema.paramsIdSchema),
