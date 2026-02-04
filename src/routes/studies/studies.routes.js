@@ -248,6 +248,48 @@ studiesRouter.post(
   },
 );
 
+// PATCH /studies/:id/emojis - 응원 이모지 카운트 감소
+studiesRouter.patch(
+  '/:id/emojis',
+  validate('params', studiesSchema.paramsIdSchema),
+  validate('body', studiesSchema.emojiSchema),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { emojiType } = req.body;
+
+      const study = await studiesRepository.findStudyById(id);
+
+      if (!study) {
+        throw new NotFoundException(ERROR_MESSAGE.STUDY_NOT_FOUND);
+      }
+
+      const emoji = await studiesRepository.findEmojibyStudyId(id, emojiType);
+
+       if (!emoji) {
+        throw new NotFoundException(ERROR_MESSAGE.EMOJI_NOT_FOUND);
+      }
+      if (emoji.count <= 1) {
+        await studiesRepository.deleteEmoji(id, emojiType);
+
+        return res.status(HTTP_STATUS.OK).json({
+        success: true,
+        message:`${emojiType}이(가) 제거됨`
+      });
+      }
+
+      const updatedEmoji = await studiesRepository.decreaseEmoji(id, emojiType);
+
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        data: updatedEmoji,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
 // POST /studies/:id/points - 공부 시간 비례 포인트 적립
 studiesRouter.post(
   '/:id/points',
