@@ -24,6 +24,30 @@ studiesRouter.use('/:id/emojis', emojiRouter);
 
 // API 작성
 
+// [추가] --------- 0. GET /api/studies/:id - 특정 스터디 상세 조회 -----------
+// 프론트엔드 상세페이지에서 데이터를 불러오기 위해 반드시 필요합니다.
+studiesRouter.get(
+  '/:id',
+  validate('params', paramsIdSchema),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      // 레포지토리에서 ID로 스터디 조회
+      const study = await studiesRepository.findStudyById(id);
+
+      if (!study) {
+        return res
+          .status(HTTP_STATUS.NOT_FOUND)
+          .json({ message: '스터디를 찾을 수 없습니다.' });
+      }
+
+      res.status(HTTP_STATUS.OK).json(study);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
 // --------- 1. POST /api/studies - 새 스터디 생성 -----------
 // 미들웨어와 스터디 스키마를 통해 req.body 코드 간소화
 
