@@ -64,6 +64,7 @@ export const ERROR_MESSAGE = {
   MINUTES_MIN_VALUE: '집중하는 시간은 최소 30분 이상이어야 합니다.',
 
   // Emoji 관련
+  EMOJI_NOT_FOUND: '이모지를 찾을 수 없습니다.',
   EMOJI_TYPE_REQUIRED: '이모지를 생성해 주세요.',
 
   // common 에러

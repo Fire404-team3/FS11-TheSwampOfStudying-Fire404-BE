@@ -80,23 +80,23 @@ function findStudyWithHabits(id) {
 
 // 아래 주석처리 된 두가지 합쳤음
 // function fetchAllResources(id, weekStart, weekEnd) {
-  
+
 //   return prisma.study.findUnique({
 //     where: { id: String(id) },
 //     include: {
 //       // 1. 습관과 그에 딸린 기록들까지 모두 포함
 //       habits: {
 //         orderBy:{createdAt:'asc'},
-//         include: { 
+//         include: {
 //           records: {
 //             where:{checkDate:{gte:startOfDay,let:end}}
-//           } 
+//           }
 //         },
 //       },
 //       // 2. 이모지 로그를 카운트 순으로 정렬해서 포함
 //       emojiLogs: {
-//         orderBy: { 
-//           count: 'desc' 
+//         orderBy: {
+//           count: 'desc'
 //         },
 //       },
 //     },
@@ -123,8 +123,8 @@ const fetchAllResources = async (id, weekStat, weekEnd) => {
       },
       emojiLogs: {
         orderBy: {
-          count:'desc'
-        }
+          count: 'desc',
+        },
       },
     },
   });
@@ -177,6 +177,44 @@ function upsertEmoji(studyId, emojiType) {
   });
 }
 
+async function findEmojibyStudyId(studyId, emojiType) {
+  return prisma.emojiLog.findUnique({
+    where: {
+      studyId_emojiType: {
+        studyId,
+        emojiType,
+      },
+    },
+  });
+}
+
+async function decreaseEmoji(studyId, emojiType) {
+  return prisma.emojiLog.update({
+    where: {
+      studyId_emojiType: {
+        studyId,
+        emojiType,
+      },
+    },
+    data: {
+      count: {
+        decrement: 1,
+      },
+    },
+  });
+}
+
+async function deleteEmoji(studyId, emojiType) {
+  return prisma.emojiLog.delete({
+    where: {
+      studyId_emojiType: {
+        studyId,
+        emojiType,
+      },
+    },
+  });
+}
+
 // 포인트 적립
 function addPoints(id, earnedPoints) {
   return prisma.study.update({
@@ -199,5 +237,8 @@ export const studiesRepository = {
   fetchAllResources,
   // findStudyWithTopEmojis,
   upsertEmoji,
+  findEmojibyStudyId,
+  decreaseEmoji,
+  deleteEmoji,
   addPoints,
 };

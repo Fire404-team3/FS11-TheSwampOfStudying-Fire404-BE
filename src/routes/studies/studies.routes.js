@@ -40,7 +40,6 @@ studiesRouter.get(
   },
 );
 
-
 // --------- 1. POST /api/studies - 새 스터디 생성 -----------
 // 미들웨어와 스터디 스키마를 통해 req.body 코드 간소화
 
@@ -50,7 +49,6 @@ studiesRouter.post(
   async (req, res, next) => {
     try {
       const newStudy = await studiesRepository.createStudy(req.body);
-
 
       res.status(HTTP_STATUS.CREATED).json(newStudy);
     } catch (error) {
@@ -92,7 +90,6 @@ studiesRouter.patch(
       const { id } = req.params;
       const updatedStudy = await studiesRepository.updateStudy(id, req.body);
 
-
       res.status(HTTP_STATUS.OK).json(updatedStudy);
     } catch (error) {
       next(error);
@@ -112,9 +109,7 @@ studiesRouter.delete(
     try {
       const { id } = req.params;
 
-
       await studiesRepository.deleteStudy(id);
-
 
       res.sendStatus(HTTP_STATUS.NO_CONTENT);
     } catch (error) {
@@ -133,10 +128,14 @@ studiesRouter.get(
       const { id } = req.params;
 
       const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
-      const weekEnd = endOfDay(new Date(), { weekStartsOn:1})
+      const weekEnd = endOfDay(new Date(), { weekStartsOn: 1 });
 
       // 통합된 레포지토리 메서드 호출 (habits, records, sorted emojiLogs 포함)
-      const study = await studiesRepository.fetchAllResources(id,weekStart,weekEnd);
+      const study = await studiesRepository.fetchAllResources(
+        id,
+        weekStart,
+        weekEnd,
+      );
 
       // 3. 존재 여부 확인 및 예외 처리
       if (!study) {
@@ -242,6 +241,47 @@ studiesRouter.post(
       res.status(HTTP_STATUS.CREATED).json({
         success: true,
         data: emoji,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+studiesRouter.patch(
+  '/:id/emojis',
+  validate('params', studiesSchema.paramsIdSchema),
+  validate('body', studiesSchema.emojiSchema),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { emojiType } = req.body;
+
+      const study = await studiesRepository.findStudyById(id);
+
+      if (!study) {
+        throw new NotFoundException(ERROR_MESSAGE.STUDY_NOT_FOUND);
+      }
+
+      const emoji = await studiesRepository.findEmojibyStudyId(id, emojiType);
+
+       if (!emoji) {
+        throw new NotFoundException(ERROR_MESSAGE.EMOJI_NOT_FOUND);
+      }
+      if (emoji.count <= 1) {
+        await studiesRepository.deleteEmoji(id, emojiType);
+
+        return res.status(HTTP_STATUS.OK).json({
+        success: true,
+        message:`${emojiType}이(가) 제거됨`
+      });
+      }
+
+      const updatedEmoji = await studiesRepository.decreaseEmoji(id, emojiType);
+
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        data: updatedEmoji,
       });
     } catch (error) {
       next(error);
