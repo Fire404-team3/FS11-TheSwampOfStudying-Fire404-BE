@@ -9,7 +9,7 @@ const app = express();
 app.use(express.json());
 
 app.use(corsMiddleware);
-app.options('*', corsMiddleware);
+app.options(/.*/, corsMiddleware);
 
 app.use('/', router);
 
