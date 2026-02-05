@@ -1,33 +1,17 @@
-export const cors = (req, res, next) => {
-  const origin = req.headers.origin;
-  const isProduction = process.env.NODE_ENV === 'production';
+import cors from 'cors';
 
-  const whiteList = [
-    'https://your-production-site.com',
-    'https://admin.your-site.com',
-  ];
+const whitelist = ['https://theswampofstudying.netlify.app'];
 
-  const isAllowed = !isProduction || (origin && whiteList.includes(origin));
-
-  if (isAllowed && origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
-  } else if (!isProduction) {
-    // 개발 환경인데 Origin 헤더가 없는 경우(Postman 등)를 위해 최소한의 허용
-    res.header('Access-Control-Allow-Origin', '*');
-  }
-
-  // 공통 헤더 설정
-  res.header(
-    'Access-Control-Allow-Methods',
-    'GET, POST, PUT, PATCH, DELETE, OPTIONS',
-  );
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-  // Preflight(사전 요청) 처리
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-
-  next();
+const corsOptions = {
+  origin: function(origin, callback) {
+    if (!origin || whitelist.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 };
+
+export default cors(corsOptions);

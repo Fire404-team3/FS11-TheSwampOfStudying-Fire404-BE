@@ -2,12 +2,13 @@ import express from 'express';
 import { router } from './routes/index.js';
 import { config } from '#config';
 import { prisma } from '#db/prisma.js';
-import { cors, errorHandler } from '#middlewares';
+import { errorHandler } from '#middlewares';
+import corsMiddleware from './middlewares/cors.middleware.js';
 
 const app = express();
 app.use(express.json());
 
-app.use(cors);
+app.use(corsMiddleware);
 
 app.use('/', router);
 

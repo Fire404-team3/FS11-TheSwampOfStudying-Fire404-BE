@@ -1,5 +1,5 @@
 {
-  "name": "project-name",
+  "name": "공부의 숲",
   "description": "팀 프로젝트 '공부의 숲' 백엔드 서버",
   "version": "1.0.0",
   "main": "src/server.js",
@@ -56,6 +56,7 @@
     "@prisma/client": "^7.3.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.3",
     "dotenv-cli": "^11.0.0",
