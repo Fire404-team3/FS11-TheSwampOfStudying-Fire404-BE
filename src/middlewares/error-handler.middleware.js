@@ -2,9 +2,19 @@ import { Prisma } from '#generated/prisma/client.ts';
 import { ERROR_MESSAGE, HTTP_STATUS, PRISMA_ERROR } from '#constants';
 import { HttpException } from '#exceptions';
 import { isDevelopment } from '#config';
+import { ZodError } from 'zod';
 
 export const errorHandler = (err, req, res, _next) => {
   console.error(err.stack);
+
+  // Zod validation 에러 처리
+  if (err instanceof ZodError) {
+    const messages = err.errors.map((e) => e.message).join(', ');
+    return res.status(400).json({
+      success: false,
+      message: messages,
+    });
+  }
 
   // HttpException 상속 에러
   if (err instanceof HttpException) {
