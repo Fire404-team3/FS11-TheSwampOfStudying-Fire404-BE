@@ -20,6 +20,7 @@
     "#services/*": "./src/services/*"
   },
   "scripts": {
+    "start": "node src/server.js",
     "dev": "nodemon --env-file=./env/.env.development src/server.js",
     "prod": "node --env-file=./env/.env.production src/server.js",
     "prisma:migrate": "dotenv -e ./env/.env.development -- npx prisma migrate dev",
