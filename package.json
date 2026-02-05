@@ -1,7 +1,7 @@
 {
   "name": "project-name",
-  "description": "팀 프로젝트 '프로젝트 이름' 백엔드 서버",
-  "version": "0.0.1",
+  "description": "팀 프로젝트 '공부의 숲' 백엔드 서버",
+  "version": "1.0.0",
   "main": "src/server.js",
   "type": "module",
   "engines": {
