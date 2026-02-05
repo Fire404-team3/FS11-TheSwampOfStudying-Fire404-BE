@@ -165,12 +165,12 @@ src/
 │  ├─ index.js
 │  ├─ studies/
 │  │  ├─ index.js
-│  │  └─ studies.routes.js
+│  │  ├─ studies.routes.js
+│  │  └─ studies.schema.js
 │  ├─ habits/
-  │  │  ├─ index.js
-  │  │  └─ habits.routes.js
-  │  └─ emojis/
-  │     ├─ index.js
-  │     └─ emojis.routes.js
+│  │  ├─ index.js
+│  │  ├─ habits.routes.js
+│  │  └─ shabits.schema.js
 
 ```
+
